@@ -67,4 +67,7 @@ app.get('/api/stream/:fileId', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
+app.get('/', (req, res) => {
+  res.send('VIP Vault Backend is Running and Active! 🚀');
+});
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
