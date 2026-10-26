@@ -211,7 +211,7 @@
         .thumbnail-container {
             width: 100%;
             height: 110px;
-            background: linear-gradient(135deg, #1f242d 0%, #111318 100%);
+            background-color: #111318;
             position: relative;
             display: flex;
             align-items: center;
@@ -230,6 +230,7 @@
             padding: 2px 6px;
             border-radius: 4px;
             letter-spacing: 0.5px;
+            z-index: 2;
         }
 
         .play-icon-overlay {
@@ -243,6 +244,8 @@
             justify-content: center;
             color: var(--accent-gold);
             font-size: 14px;
+            z-index: 2;
+            backdrop-filter: blur(2px);
         }
 
         .card-content {
@@ -288,6 +291,18 @@
             border: 1px solid var(--border-color);
             border-radius: 14px;
             color: var(--text-muted);
+        }
+
+        .empty-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            background: rgba(226, 183, 75, 0.08);
+            border: 1px solid rgba(226, 183, 75, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px auto;
         }
     </style>
 </head>
@@ -339,7 +354,7 @@
         // REPLACE WITH YOUR LIVE RENDER BACKEND URL
         const BACKEND_URL = "https://vip-vault-backend-n771.onrender.com"; 
 
-        // INITIALIZE ADSGRAM (Replace "YOUR_ADSGRAM_BLOCK_ID" with your actual block ID from adsgram.ai)
+        // INITIALIZE ADSGRAM (Replace with your actual block ID from adsgram.ai)
         const adController = window.Adsgram ? window.Adsgram.init({ blockId: "55423" }) : null;
 
         let allVideos = [];
@@ -368,28 +383,42 @@
             if (videos.length === 0) {
                 grid.innerHTML = `
                     <div class="empty-state">
-                        <div style="font-size: 24px; margin-bottom: 8px;">📭</div>
-                        <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">Nothing to show yet</div>
-                        <div style="font-size: 11px;">Upload a video to your Telegram channel to populate the vault.</div>
+                        <div class="empty-icon-wrapper">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e2b74b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </div>
+                        <div style="font-weight: 700; color: #ffffff; font-size: 14px; margin-bottom: 6px;">Nothing to show yet</div>
+                        <div style="font-size: 11px; color: var(--text-muted); max-width: 260px; margin: 0 auto; line-height: 1.4;">
+                            The catalog is reachable, but it has no entries right now. Upload a video to your Telegram channel to populate the vault.
+                        </div>
                     </div>
                 `;
                 return;
             }
 
-            grid.innerHTML = videos.map(video => `
-                <div class="video-card">
-                    <div class="thumbnail-container">
-                        <div class="featured-badge">FEATURED</div>
-                        <div class="play-icon-overlay">▶</div>
+            grid.innerHTML = videos.map(video => {
+                // Background styling for automatic thumbnail loading with dark gradient fallback
+                const thumbStyle = video.thumbnailUrl 
+                    ? `background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url('${video.thumbnailUrl}') center/cover no-repeat;`
+                    : `background: linear-gradient(135deg, #1f242d 0%, #111318 100%);`;
+
+                return `
+                    <div class="video-card">
+                        <div class="thumbnail-container" style="${thumbStyle}">
+                            <div class="featured-badge">FEATURED</div>
+                            <div class="play-icon-overlay">▶</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="video-title">${escapeHtml(video.title)}</div>
+                            <button class="watch-btn" onclick="handleWatchClick('${video.videoUrl}')">
+                                ▶ WATCH VIDEO
+                            </button>
+                        </div>
                     </div>
-                    <div class="card-content">
-                        <div class="video-title">${escapeHtml(video.title)}</div>
-                        <button class="watch-btn" onclick="handleWatchClick('${video.videoUrl}')">
-                            ▶ WATCH VIDEO
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Handle Ad + Video Streaming Playback
@@ -400,11 +429,9 @@
                     window.open(videoUrl, '_blank');
                 }).catch((err) => {
                     console.log("Ad skipped or failed", err);
-                    // Fallback: open video anyway or require ad watch depending on preference
                     window.open(videoUrl, '_blank');
                 });
             } else {
-                // Fallback if opened outside Telegram or Ad SDK fails to initialize
                 window.open(videoUrl, '_blank');
             }
         }
