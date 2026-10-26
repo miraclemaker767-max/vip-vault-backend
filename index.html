@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VIPVaultMedia</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Adsgram SDK -->
+    <script src="https://sad.adsgram.ai/js/sad.js"></script>
     <style>
         :root {
             --bg-color: #0d0f12;
@@ -334,7 +336,12 @@
     </div>
 
     <script>
+        // REPLACE WITH YOUR LIVE RENDER BACKEND URL
         const BACKEND_URL = "https://vip-vault-backend-n771.onrender.com"; 
+
+        // INITIALIZE ADSGRAM (Replace "YOUR_ADSGRAM_BLOCK_ID" with your actual block ID from adsgram.ai)
+        const adController = window.Adsgram ? window.Adsgram.init({ blockId: "55423" }) : null;
+
         let allVideos = [];
 
         async function fetchVideos() {
@@ -377,12 +384,29 @@
                     </div>
                     <div class="card-content">
                         <div class="video-title">${escapeHtml(video.title)}</div>
-                        <button class="watch-btn" onclick="window.open('${video.videoUrl}', '_blank')">
+                        <button class="watch-btn" onclick="handleWatchClick('${video.videoUrl}')">
                             ▶ WATCH VIDEO
                         </button>
                     </div>
                 </div>
             `).join('');
+        }
+
+        // Handle Ad + Video Streaming Playback
+        function handleWatchClick(videoUrl) {
+            if (adController) {
+                adController.show().then((result) => {
+                    // Ad completed successfully, open video stream
+                    window.open(videoUrl, '_blank');
+                }).catch((err) => {
+                    console.log("Ad skipped or failed", err);
+                    // Fallback: open video anyway or require ad watch depending on preference
+                    window.open(videoUrl, '_blank');
+                });
+            } else {
+                // Fallback if opened outside Telegram or Ad SDK fails to initialize
+                window.open(videoUrl, '_blank');
+            }
         }
 
         function filterVideos() {
@@ -396,7 +420,7 @@
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // Load videos on startup
+        // Load catalog on startup
         fetchVideos();
     </script>
 </body>
