@@ -33,8 +33,20 @@ bot.on('channel_post', async (msg) => {
   const caption = msg.caption || 'VIP Vault Video';
 
   try {
+    // 1. Get the main video/file path
     const file = await bot.getFile(fileId);
     const videoUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
+
+    // 2. Automatically extract thumbnail URL if available from Telegram
+    let thumbnailUrl = '';
+    if (mediaObj.thumb && mediaObj.thumb.file_id) {
+      try {
+        const thumbFile = await bot.getFile(mediaObj.thumb.file_id);
+        thumbnailUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${thumbFile.file_path}`;
+      } catch (thumbErr) {
+        console.log("⚠️ Could not fetch thumbnail file path:", thumbErr.message);
+      }
+    }
 
     const exists = videoList.some(v => v.fileId === fileId);
     if (!exists) {
@@ -43,9 +55,10 @@ bot.on('channel_post', async (msg) => {
         title: caption,
         fileId: fileId,
         videoUrl: videoUrl,
+        thumbnailUrl: thumbnailUrl, // Pass the auto-extracted thumbnail link here
         createdAt: new Date()
       });
-      console.log('✅ SUCCESS! Video synced to Mini App:', caption);
+      console.log('✅ SUCCESS! Video & Auto-Thumbnail synced to Mini App:', caption);
     }
   } catch (err) {
     console.error('❌ Telegram File Download Error (File might be larger than 20MB):', err.message);
