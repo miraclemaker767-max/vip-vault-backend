@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VIP Vault Media</title>
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Adsgram SDK -->
+  <script src="https://sad.adsgram.ai/js/sad-index.js"></script>
+  <style>
+    :root {
+      --bg-color: #0f0f0f;
+      --card-bg: #1a1a1a;
+      --accent-gold: #d4af37;
+      --text-color: #ffffff;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 12px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #333;
+    }
+    h1 {
+      font-size: 1.2rem;
+      margin: 0;
+      color: var(--accent-gold);
+    }
+    .vip-btn {
+      background: linear-gradient(45deg, #d4af37, #f3e5ab);
+      color: #000;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .video-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .video-card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid #2a2a2a;
+    }
+    .video-card h3 {
+      font-size: 1rem;
+      margin: 0 0 10px 0;
+    }
+    .watch-btn {
+      width: 100%;
+      background: var(--accent-gold);
+      color: #000;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .player-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 999;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    video {
+      width: 100%;
+      max-height: 70vh;
+    }
+    .close-btn {
+      margin-top: 15px;
+      color: #fff;
+      background: #333;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>VIP Vault Media</h1>
+    <button class="vip-btn" onclick="openVipModal()">⚡ VIP ACCESS</button>
+  </header>
+
+  <div class="video-grid" id="videoList">
+    <p>Loading videos...</p>
+  </div>
+
+  <!-- Video Stream Player Modal -->
+  <div class="player-modal" id="playerModal">
+    <video id="videoPlayer" controls controlsList="nodownload"></video>
+    <button class="close-btn" onclick="closePlayer()">Close Player</button>
+  </div>
+
+  <script>
+    // Point directly to your local backend on port 5000
+    const BACKEND_URL = "https://vip-vault-backend-n771.onrender.com";
+    const ADSGRAM_BLOCK_ID = "55423";
+
+    async function loadVideos() {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/videos`);
+        const data = await res.json();
+        const container = document.getElementById('videoList');
+        
+        if (!data.videos || data.videos.length === 0) {
+          container.innerHTML = '<p style="color: #aaa; text-align: center;">No videos available yet. Upload a video file into your private Telegram channel!</p>';
+          return;
+        }
+
+        container.innerHTML = data.videos.map(v => `
+          <div class="video-card">
+            <h3>${v.title}</h3>
+            <button class="watch-btn" onclick="playWithAd('${v.fileId}')">▶ Watch Video</button>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error("Error loading videos:", err);
+        document.getElementById('videoList').innerHTML = '<p style="color: red;">Error connecting to backend server.</p>';
+      }
+    }
+
+    function playWithAd(fileId) {
+      // Direct stream for testing
+      startStream(fileId);
+    }
+
+    function startStream(fileId) {
+      const modal = document.getElementById('playerModal');
+      const player = document.getElementById('videoPlayer');
+      player.src = `${BACKEND_URL}/api/stream/${fileId}`;
+      modal.style.display = 'flex';
+      player.play();
+    }
+
+    function closePlayer() {
+      const modal = document.getElementById('playerModal');
+      const player = document.getElementById('videoPlayer');
+      player.pause();
+      player.src = '';
+      modal.style.display = 'none';
+    }
+
+    function openVipModal() {
+      alert("VIP Vault Access:\n\nUnlock ad-free streaming, exclusive full-length media, and direct downloads!");
+    }
+
+    loadVideos();
+  </script>
+</body>
+</html>
