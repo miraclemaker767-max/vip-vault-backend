@@ -48,13 +48,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            font-weight: 800;
             color: var(--accent-gold);
             font-size: 18px;
         }
 
         .brand-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 800;
             letter-spacing: 0.5px;
             line-height: 1.2;
@@ -64,6 +64,7 @@
             font-size: 10px;
             color: var(--text-muted);
             letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .vip-btn {
@@ -72,8 +73,8 @@
             border: none;
             padding: 8px 14px;
             border-radius: 20px;
-            font-weight: 700;
-            font-size: 12px;
+            font-weight: 800;
+            font-size: 11px;
             display: flex;
             align-items: center;
             gap: 5px;
@@ -95,13 +96,13 @@
             font-size: 10px;
             letter-spacing: 1.5px;
             color: var(--accent-gold);
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 6px;
             text-transform: uppercase;
         }
 
         .hero-title {
-            font-size: 22px;
+            font-size: 21px;
             font-weight: 800;
             margin: 0 0 6px 0;
             line-height: 1.2;
@@ -120,6 +121,7 @@
             gap: 6px;
             font-size: 11px;
             color: var(--text-muted);
+            font-weight: 600;
         }
 
         .status-dot {
@@ -161,6 +163,7 @@
             justify-content: center;
             color: var(--text-main);
             cursor: pointer;
+            font-size: 15px;
         }
 
         .section-header {
@@ -171,25 +174,28 @@
         }
 
         .section-title {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 800;
             margin: 0;
+            letter-spacing: -0.2px;
         }
 
         .section-subtitle {
             font-size: 11px;
             color: var(--text-muted);
             margin: 2px 0 0 0;
+            font-weight: 500;
         }
 
         .video-count-badge {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             color: var(--accent-gold);
-            padding: 4px 10px;
+            padding: 5px 10px;
             border-radius: 12px;
             font-size: 11px;
-            font-weight: 700;
+            font-weight: 800;
+            letter-spacing: 0.5px;
         }
 
         .video-grid {
@@ -210,7 +216,7 @@
 
         .thumbnail-container {
             width: 100%;
-            height: 110px;
+            height: 115px;
             background-color: #111318;
             position: relative;
             display: flex;
@@ -222,7 +228,7 @@
             position: absolute;
             top: 8px;
             left: 8px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
             border: 1px solid rgba(226, 183, 75, 0.3);
             color: var(--accent-gold);
             font-size: 9px;
@@ -236,16 +242,16 @@
         .play-icon-overlay {
             width: 36px;
             height: 36px;
-            background: rgba(226, 183, 75, 0.15);
-            border: 1px solid rgba(226, 183, 75, 0.4);
+            background: rgba(226, 183, 75, 0.2);
+            border: 1px solid rgba(226, 183, 75, 0.5);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--accent-gold);
-            font-size: 14px;
+            font-size: 13px;
             z-index: 2;
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(3px);
         }
 
         .card-content {
@@ -258,13 +264,14 @@
 
         .video-title {
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             margin: 0 0 10px 0;
-            line-height: 1.3;
+            line-height: 1.35;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            color: #f3f4f6;
         }
 
         .watch-btn {
@@ -274,13 +281,14 @@
             width: 100%;
             padding: 8px;
             border-radius: 8px;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 11px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 5px;
+            letter-spacing: 0.3px;
         }
 
         .empty-state {
@@ -304,6 +312,76 @@
             justify-content: center;
             margin: 0 auto 12px auto;
         }
+
+        /* IN-APP VIDEO PLAYER MODAL */
+        #playerModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        .modal-content-wrapper {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 380px;
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0 4px;
+        }
+
+        .video-player-container {
+            width: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        video {
+            width: 100%;
+            max-height: 70vh;
+            outline: none;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -313,7 +391,7 @@
             <div class="brand-logo">V</div>
             <div>
                 <div class="brand-title">VIP CONTENT VAULT</div>
-                <div class="brand-subtitle">CURATED VIDEO COLLECTION</div>
+                <div class="brand-subtitle">CURATED COLLECTION</div>
             </div>
         </div>
         <button class="vip-btn" onclick="alert('VIP Access unlocked via Telegram Premium')">
@@ -350,12 +428,25 @@
         <!-- Dynamic videos load here -->
     </div>
 
+    <!-- IN-APP VIDEO STREAMING MODAL -->
+    <div id="playerModal">
+        <div class="modal-content-wrapper">
+            <div class="modal-header">
+                <div class="modal-title" id="modalVideoTitle">Streaming Video</div>
+                <button class="close-modal-btn" onclick="closePlayer()">×</button>
+            </div>
+            <div class="video-player-container">
+                <video id="activeVideoPlayer" controls autoplay playsinline></video>
+            </div>
+        </div>
+    </div>
+
     <script>
         // REPLACE WITH YOUR LIVE RENDER BACKEND URL
         const BACKEND_URL = "https://vip-vault-backend-n771.onrender.com"; 
 
-        // INITIALIZE ADSGRAM (Replace with your actual block ID from adsgram.ai)
-        const adController = window.Adsgram ? window.Adsgram.init({ blockId: "55423" }) : null;
+        // INITIALIZE ADSGRAM (Replace with your actual block ID from adsgram.ai if desired)
+        const adController = window.Adsgram ? window.Adsgram.init({ blockId: "YOUR_ADSGRAM_BLOCK_ID" }) : null;
 
         let allVideos = [];
 
@@ -399,10 +490,13 @@
             }
 
             grid.innerHTML = videos.map(video => {
-                // Background styling for automatic thumbnail loading with dark gradient fallback
                 const thumbStyle = video.thumbnailUrl 
-                    ? `background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url('${video.thumbnailUrl}') center/cover no-repeat;`
+                    ? `background: linear-gradient(rgba(0,0,0,0.15), rgba(0,0,0,0.35)), url('${video.thumbnailUrl}') center/cover no-repeat;`
                     : `background: linear-gradient(135deg, #1f242d 0%, #111318 100%);`;
+
+                // Escape single quotes for safety in inline function calls
+                const safeTitle = video.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const safeUrl = video.videoUrl;
 
                 return `
                     <div class="video-card">
@@ -412,7 +506,7 @@
                         </div>
                         <div class="card-content">
                             <div class="video-title">${escapeHtml(video.title)}</div>
-                            <button class="watch-btn" onclick="handleWatchClick('${video.videoUrl}')">
+                            <button class="watch-btn" onclick="handleWatchClick('${safeUrl}', '${safeTitle}')">
                                 ▶ WATCH VIDEO
                             </button>
                         </div>
@@ -421,19 +515,38 @@
             }).join('');
         }
 
-        // Handle Ad + Video Streaming Playback
-        function handleWatchClick(videoUrl) {
+        // Handle Ad + In-App Player Modal Trigger
+        function handleWatchClick(videoUrl, videoTitle) {
             if (adController) {
                 adController.show().then((result) => {
-                    // Ad completed successfully, open video stream
-                    window.open(videoUrl, '_blank');
+                    openPlayer(videoUrl, videoTitle);
                 }).catch((err) => {
                     console.log("Ad skipped or failed", err);
-                    window.open(videoUrl, '_blank');
+                    openPlayer(videoUrl, videoTitle);
                 });
             } else {
-                window.open(videoUrl, '_blank');
+                openPlayer(videoUrl, videoTitle);
             }
+        }
+
+        function openPlayer(url, title) {
+            const modal = document.getElementById('playerModal');
+            const player = document.getElementById('activeVideoPlayer');
+            const titleEl = document.getElementById('modalVideoTitle');
+
+            titleEl.innerText = title;
+            player.src = url;
+            modal.style.display = 'flex';
+            player.play().catch(e => console.log("Autoplay blocked:", e));
+        }
+
+        function closePlayer() {
+            const modal = document.getElementById('playerModal');
+            const player = document.getElementById('activeVideoPlayer');
+            
+            player.pause();
+            player.src = '';
+            modal.style.display = 'none';
         }
 
         function filterVideos() {
