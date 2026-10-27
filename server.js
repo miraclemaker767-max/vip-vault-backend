@@ -3,7 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const TelegramBot = require('node-telegram-bot-api');
 const path = require('path');
-
+app.get('/ping', (req, res) => {
+  res.send('OK');
+});
 // Safely load mongoose so it never crashes Render if package.json misses it
 let mongoose = null;
 let Video = null;
