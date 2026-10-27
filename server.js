@@ -12,47 +12,29 @@ const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
-// Initialize Telegram Bot (using polling to listen for channel posts)
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
+// Initialize Telegram Bot without polling (using webhooks or basic API calls)
+const bot = new TelegramBot(BOT_TOKEN);
 
 let db, mediaCollection;
 
 // Connect to MongoDB Atlas
 MongoClient.connect(MONGO_URI)
   .then(client => {
-    db = client.db('vip_vault'); // Database name
-    mediaCollection = db.collection('media'); // Collection name
+    db = client.db('vip_vault');
+    mediaCollection = db.collection('media');
     console.log('✅ Connected successfully to MongoDB Atlas');
   })
   .catch(err => {
     console.error('❌ MongoDB connection error:', err);
   });
 
-// Listen for new posts in the Telegram channel/chat
-bot.on('channel_post', async (msg) => {
-  try {
-    if (msg.video || msg.document) {
-      const fileId = msg.video ? msg.video.file_id : msg.document.file_id;
-      const caption = msg.caption || 'VIP Media';
-      
-      const mediaItem = {
-        fileId,
-        caption,
-        messageId: msg.message_id,
-        createdAt: new Date()
-      };
-
-      if (mediaCollection) {
-        await mediaCollection.insertOne(mediaItem);
-        console.log(`✅ Saved new media to MongoDB: "${caption}"`);
-      }
-    }
-  } catch (err) {
-    console.error('❌ Error saving channel post to database:', err);
-  }
+// Webhook endpoint to receive updates directly from Telegram
+app.post(`/bot${BOT_TOKEN}`, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
 });
 
-// API endpoint for your Telegram Mini App frontend to fetch videos
+// API endpoint for your frontend
 app.get('/api/videos', async (req, res) => {
   try {
     if (!mediaCollection) {
@@ -70,7 +52,6 @@ app.get('/', (req, res) => {
   res.send('VIP Vault Backend is running and connected to MongoDB!');
 });
 
-// Bind to Render's dynamic port
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
