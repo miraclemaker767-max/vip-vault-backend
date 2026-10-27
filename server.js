@@ -1,103 +1,76 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const TelegramBot = require('node-telegram-bot-api');
+require('dotenv').config();
 const { MongoClient } = require('mongodb');
+const TelegramBot = require('node-telegram-bot-api');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
-const CHANNEL_ID = process.env.CHANNEL_ID;
+const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGO_URI;
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
-// MongoDB Connection Setup
-const mongoUri = process.env.MONGO_URI;
-let db, videosCollection;
+// Initialize Telegram Bot (using polling to listen for channel posts)
+const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
 
-async function connectDB() {
-  try {
-    const client = new MongoClient(mongoUri);
-    await client.connect();
-    db = client.db('vip_vault_db');
-    videosCollection = db.collection('videos');
+let db, mediaCollection;
+
+// Connect to MongoDB Atlas
+MongoClient.connect(MONGO_URI)
+  .then(client => {
+    db = client.db('vip_vault'); // Database name
+    mediaCollection = db.collection('media'); // Collection name
     console.log('✅ Connected successfully to MongoDB Atlas');
-  } catch (err) {
-    console.error('❌ MongoDB Connection Error:', err);
-  }
-}
-connectDB();
+  })
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+  });
 
-// Handle incoming Telegram channel posts
+// Listen for new posts in the Telegram channel/chat
 bot.on('channel_post', async (msg) => {
-  console.log("--> Post detected in Channel ID:", msg.chat.id);
-  
-  if (msg.chat.id.toString() !== CHANNEL_ID.toString()) {
-    console.log("⚠️ Chat ID does not match .env CHANNEL_ID");
-    return;
-  }
-
-  const mediaObj = msg.video || msg.document || msg.animation || msg.video_note;
-
-  if (!mediaObj) {
-    console.log("⚠️ Received post, but it was not a video or file.");
-    return;
-  }
-
-  const fileId = mediaObj.file_id;
-  const caption = msg.caption || 'VIP Vault Video';
-
   try {
-    const file = await bot.getFile(fileId);
-    const videoUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
+    if (msg.video || msg.document) {
+      const fileId = msg.video ? msg.video.file_id : msg.document.file_id;
+      const caption = msg.caption || 'VIP Media';
+      
+      const mediaItem = {
+        fileId,
+        caption,
+        messageId: msg.message_id,
+        createdAt: new Date()
+      };
 
-    let thumbnailUrl = '';
-    if (mediaObj.thumb && mediaObj.thumb.file_id) {
-      try {
-        const thumbFile = await bot.getFile(mediaObj.thumb.file_id);
-        thumbnailUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${thumbFile.file_path}`;
-      } catch (thumbErr) {
-        console.log("⚠️ Could not fetch thumbnail file path:", thumbErr.message);
-      }
-    }
-
-    if (videosCollection) {
-      const existing = await videosCollection.findOne({ fileId: fileId });
-      if (!existing) {
-        const videoDoc = {
-          id: msg.message_id,
-          title: caption,
-          fileId: fileId,
-          videoUrl: videoUrl,
-          thumbnailUrl: thumbnailUrl,
-          createdAt: new Date()
-        };
-
-        await videosCollection.insertOne(videoDoc);
-        console.log('✅ SUCCESS! Video saved permanently to MongoDB:', caption);
+      if (mediaCollection) {
+        await mediaCollection.insertOne(mediaItem);
+        console.log(`✅ Saved new media to MongoDB: "${caption}"`);
       }
     }
   } catch (err) {
-    console.error('❌ Telegram File Download Error:', err.message);
+    console.error('❌ Error saving channel post to database:', err);
   }
 });
 
-// API endpoint to fetch videos from MongoDB
+// API endpoint for your Telegram Mini App frontend to fetch videos
 app.get('/api/videos', async (req, res) => {
   try {
-    if (!videosCollection) {
-      return res.json({ success: true, videos: [] });
+    if (!mediaCollection) {
+      return res.status(500).json({ error: 'Database connection is still initializing' });
     }
-    const videos = await videosCollection.find({}).sort({ createdAt: -1 }).toArray();
-    res.json({ success: true, videos });
+    const videos = await mediaCollection.find({}).sort({ createdAt: -1 }).toArray();
+    res.json(videos);
   } catch (err) {
-    console.error('Failed to fetch from DB:', err);
-    res.status(500).json({ success: false, error: 'Database error' });
+    res.status(500).json({ error: err.message });
   }
 });
 
-const PORT = process.env.PORT || 5000;
+// Health check root route
 app.get('/', (req, res) => {
-  res.send('VIP Vault Backend with MongoDB is Running! 🚀');
+  res.send('VIP Vault Backend is running and connected to MongoDB!');
 });
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Bind to Render's dynamic port
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
+});
