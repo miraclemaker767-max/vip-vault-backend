@@ -2,32 +2,55 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const TelegramBot = require('node-telegram-bot-api');
-const path = require('path'); // Added to serve files
+const path = require('path');
+
+// Safely load mongoose so it never crashes Render if package.json misses it
+let mongoose = null;
+let Video = null;
+try {
+  mongoose = require('mongoose');
+  const videoSchema = new mongoose.Schema({
+    id: Number,
+    title: String,
+    fileId: { type: String, unique: true },
+    videoUrl: String,
+    thumbnailUrl: String,
+    createdAt: { type: Date, default: Date.now }
+  });
+  Video = mongoose.model('Video', videoSchema);
+} catch (e) {
+  console.log("⚠️ Mongoose not found, running in memory fallback mode.");
+}
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname)); // Added to serve frontend files
+app.use(express.static(__dirname));
+
+let videoList = [];
+
+// Connect to MongoDB if available and URI is set
+if (mongoose && process.env.MONGO_URI) {
+  mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('Connected to MongoDB successfully!'))
+    .catch(err => console.error('MongoDB connection error:', err.message));
+}
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 const CHANNEL_ID = process.env.CHANNEL_ID;
 
-let videoList = [];
-
 bot.on('channel_post', async (msg) => {
   console.log("--> Post detected in Channel ID:", msg.chat.id);
   
-  // Check if Chat ID matches
   if (msg.chat.id.toString() !== CHANNEL_ID.toString()) {
     console.log("⚠️ Chat ID does not match .env CHANNEL_ID");
     return;
   }
 
-  // Find any media object (video, document, animation, or video_note)
   const mediaObj = msg.video || msg.document || msg.animation || msg.video_note;
 
   if (!mediaObj) {
-    console.log("⚠️ Received post, but it was not a video or file (maybe pure text or photo).");
+    console.log("⚠️ Received post, but it was not a video or file.");
     return;
   }
 
@@ -35,11 +58,9 @@ bot.on('channel_post', async (msg) => {
   const caption = msg.caption || 'VIP Vault Video';
 
   try {
-    // 1. Get the main video/file path
     const file = await bot.getFile(fileId);
     const videoUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
 
-    // 2. Automatically extract thumbnail URL if available from Telegram
     let thumbnailUrl = '';
     if (mediaObj.thumb && mediaObj.thumb.file_id) {
       try {
@@ -50,25 +71,41 @@ bot.on('channel_post', async (msg) => {
       }
     }
 
-    const exists = videoList.some(v => v.fileId === fileId);
-    if (!exists) {
-      videoList.unshift({
-        id: msg.message_id,
-        title: caption,
-        fileId: fileId,
-        videoUrl: videoUrl,
-        thumbnailUrl: thumbnailUrl, // Pass the auto-extracted thumbnail link here
-        createdAt: new Date()
-      });
-      console.log('✅ SUCCESS! Video & Auto-Thumbnail synced to Mini App:', caption);
+    const videoData = {
+      id: msg.message_id,
+      title: caption,
+      fileId: fileId,
+      videoUrl: videoUrl,
+      thumbnailUrl: thumbnailUrl,
+      createdAt: new Date()
+    };
+
+    // Save to MongoDB if active, otherwise use memory list
+    if (Video && mongoose.connection.readyState === 1) {
+      await Video.findOneAndUpdate({ fileId }, videoData, { upsert: true, new: true });
+      console.log('✅ SUCCESS! Video saved permanently to MongoDB:', caption);
+    } else {
+      const exists = videoList.some(v => v.fileId === fileId);
+      if (!exists) {
+        videoList.unshift(videoData);
+        console.log('✅ SUCCESS! Video saved to memory list:', caption);
+      }
     }
   } catch (err) {
-    console.error('❌ Telegram File Download Error (File might be larger than 20MB):', err.message);
+    console.error('❌ Telegram File Download Error:', err.message);
   }
 });
 
-app.get('/api/videos', (req, res) => {
-  res.json({ success: true, videos: videoList });
+app.get('/api/videos', async (req, res) => {
+  try {
+    if (Video && mongoose.connection.readyState === 1) {
+      const videos = await Video.find().sort({ _id: -1 });
+      return res.json({ success: true, videos });
+    }
+    res.json({ success: true, videos: videoList });
+  } catch (err) {
+    res.json({ success: true, videos: videoList });
+  }
 });
 
 app.get('/api/stream/:fileId', async (req, res) => {
@@ -83,7 +120,6 @@ app.get('/api/stream/:fileId', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Root route updated to serve your index.html webpage
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
