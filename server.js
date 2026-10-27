@@ -1,12 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const app = express(); // <--- Create app FIRST
-
-// --- NOW ADD THE PING ROUTE HERE ---
-app.get('/ping', (req, res) => {
-  res.send('OK');
-});
 const TelegramBot = require('node-telegram-bot-api');
 const path = require('path');
 
