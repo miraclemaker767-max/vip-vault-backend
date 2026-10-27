@@ -1,34 +1,18 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose'); // Added for MongoDB
 const TelegramBot = require('node-telegram-bot-api');
-const path = require('path'); 
+const path = require('path'); // Added to serve files
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname)); 
-
-// Connect to MongoDB
-const MONGO_URI = process.env.MONGO_URI;
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('Connected to MongoDB successfully!'))
-  .catch(err => console.error('MongoDB connection error:', err));
-
-// MongoDB Schema & Model for Permanent Storage
-const videoSchema = new mongoose.Schema({
-  id: Number,
-  title: String,
-  fileId: { type: String, unique: true },
-  videoUrl: String,
-  thumbnailUrl: String,
-  createdAt: { type: Date, default: Date.now }
-});
-const Video = mongoose.model('Video', videoSchema);
+app.use(express.static(__dirname)); // Added to serve frontend files
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 const CHANNEL_ID = process.env.CHANNEL_ID;
+
+let videoList = [];
 
 bot.on('channel_post', async (msg) => {
   console.log("--> Post detected in Channel ID:", msg.chat.id);
@@ -66,32 +50,25 @@ bot.on('channel_post', async (msg) => {
       }
     }
 
-    // Save permanently to MongoDB (prevents duplicates using fileId)
-    const exists = await Video.findOne({ fileId });
+    const exists = videoList.some(v => v.fileId === fileId);
     if (!exists) {
-      await Video.create({
+      videoList.unshift({
         id: msg.message_id,
         title: caption,
         fileId: fileId,
         videoUrl: videoUrl,
-        thumbnailUrl: thumbnailUrl,
+        thumbnailUrl: thumbnailUrl, // Pass the auto-extracted thumbnail link here
         createdAt: new Date()
       });
-      console.log('✅ SUCCESS! Video saved permanently to MongoDB:', caption);
+      console.log('✅ SUCCESS! Video & Auto-Thumbnail synced to Mini App:', caption);
     }
   } catch (err) {
     console.error('❌ Telegram File Download Error (File might be larger than 20MB):', err.message);
   }
 });
 
-// Fetch videos from MongoDB database instead of memory array
-app.get('/api/videos', async (req, res) => {
-  try {
-    const videos = await Video.find().sort({ _id: -1 });
-    res.json({ success: true, videos });
-  } catch (err) {
-    res.status(500).json({ success: false, error: 'Failed to fetch videos' });
-  }
+app.get('/api/videos', (req, res) => {
+  res.json({ success: true, videos: videoList });
 });
 
 app.get('/api/stream/:fileId', async (req, res) => {
@@ -106,7 +83,7 @@ app.get('/api/stream/:fileId', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Root route to serve your index.html webpage
+// Root route updated to serve your index.html webpage
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
