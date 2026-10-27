@@ -84,7 +84,13 @@ app.get('/api/videos', async (req, res) => {
 app.get('/', (req, res) => {
   res.send('VIP Vault Backend is running and connected to MongoDB!');
 });
+// Serve static frontend files and the main index.html
+const path = require('path');
+app.use(express.static(__dirname));
 
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
