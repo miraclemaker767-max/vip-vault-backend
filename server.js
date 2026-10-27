@@ -1,33 +1,47 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const TelegramBot = require('node-telegram-bot-api');
-const path = require('path'); // Added to serve files
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname)); // Added to serve frontend files
+app.use(express.static(__dirname));
+
+// Connect to MongoDB
+const MONGO_URI = process.env.MONGO_URI;
+mongoose.connect(MONGO_URI)
+  .then(() => console.log('VIP Vault Backend is running and connected to MongoDB!'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+// Video Schema & Model for Permanent Storage
+const videoSchema = new mongoose.Schema({
+  id: Number,
+  title: String,
+  fileId: { type: String, unique: true },
+  videoUrl: String,
+  thumbnailUrl: String,
+  createdAt: { type: Date, default: Date.now }
+});
+const Video = mongoose.model('Video', videoSchema);
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 const CHANNEL_ID = process.env.CHANNEL_ID;
 
-let videoList = [];
-
 bot.on('channel_post', async (msg) => {
   console.log("--> Post detected in Channel ID:", msg.chat.id);
   
-  // Check if Chat ID matches
   if (msg.chat.id.toString() !== CHANNEL_ID.toString()) {
     console.log("⚠️ Chat ID does not match .env CHANNEL_ID");
     return;
   }
 
-  // Find any media object (video, document, animation, or video_note)
   const mediaObj = msg.video || msg.document || msg.animation || msg.video_note;
 
   if (!mediaObj) {
-    console.log("⚠️ Received post, but it was not a video or file (maybe pure text or photo).");
+    console.log("⚠️ Received post, but it was not a video or file.");
     return;
   }
 
@@ -35,11 +49,9 @@ bot.on('channel_post', async (msg) => {
   const caption = msg.caption || 'VIP Vault Video';
 
   try {
-    // 1. Get the main video/file path
     const file = await bot.getFile(fileId);
     const videoUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
 
-    // 2. Automatically extract thumbnail URL if available from Telegram
     let thumbnailUrl = '';
     if (mediaObj.thumb && mediaObj.thumb.file_id) {
       try {
@@ -50,25 +62,32 @@ bot.on('channel_post', async (msg) => {
       }
     }
 
-    const exists = videoList.some(v => v.fileId === fileId);
-    if (!exists) {
-      videoList.unshift({
+    // Save permanently to MongoDB (prevents duplicates using fileId)
+    const existingVideo = await Video.findOne({ fileId });
+    if (!existingVideo) {
+      await Video.create({
         id: msg.message_id,
         title: caption,
         fileId: fileId,
         videoUrl: videoUrl,
-        thumbnailUrl: thumbnailUrl, // Pass the auto-extracted thumbnail link here
+        thumbnailUrl: thumbnailUrl,
         createdAt: new Date()
       });
-      console.log('✅ SUCCESS! Video & Auto-Thumbnail synced to Mini App:', caption);
+      console.log('✅ SUCCESS! Video saved permanently to MongoDB:', caption);
     }
   } catch (err) {
-    console.error('❌ Telegram File Download Error (File might be larger than 20MB):', err.message);
+    console.error('❌ Error saving video:', err.message);
   }
 });
 
-app.get('/api/videos', (req, res) => {
-  res.json({ success: true, videos: videoList });
+// Fetch videos from MongoDB database
+app.get('/api/videos', async (req, res) => {
+  try {
+    const videos = await Video.find().sort({ _id: -1 });
+    res.json({ success: true, videos });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch videos from database' });
+  }
 });
 
 app.get('/api/stream/:fileId', async (req, res) => {
@@ -83,7 +102,6 @@ app.get('/api/stream/:fileId', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Root route updated to serve your index.html webpage
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
