@@ -376,32 +376,43 @@ function finishAdAndOpenVideo() {
 
             document.getElementById('videoCountBadge').innerText = `${videos.length} ${videos.length === 1 ? 'VIDEO' : 'VIDEOS'}`;
 
-            grid.innerHTML = videos.map(video => {
-                const thumbMarkup = video.thumbnailUrl 
-                    ? `<img class="thumb" loading="lazy" decoding="async" src="${video.thumbnailUrl}" alt="">`
-                    : `<div style="position:absolute; inset:0; display:grid; place-items:center; color:#a99a7a; font-size:30px; background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%);">▶</div>`;
+           grid.innerHTML = videos.map((video, index) => {
+    const thumbUrl = video.thumbnailUrl || '';
+    const safeTitle = (video.title || 'VIP Vault Video').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    const safeUrl = video.videoUrl || '#';
 
-                const safeTitle = (video.title || 'Video').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                const safeUrl = video.videoUrl;
+    // 320x50 banner after every 4th video
+    let adBlock = '';
+    if ((index + 1) % 4 === 0) {
+        adBlock = `
+            <div style="grid-column: 1 / -1; background:#171720; border:1px solid rgba(255,255,255,.09); border-radius:16px; padding:10px; text-align:center; margin:8px 0;">
+                <div style="font-size:9px; color:#888; margin-bottom:4px;">SPONSORED</div>
+                <script type="text/javascript">
+                    atOptions = { 'key' : '6158574', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+                </script>
+                <script type="text/javascript" src="//www.highperformanceformat.com/6158574/invoke.js"></script>
+            </div>
+        `;
+    }
 
-                return `
-                    <article class="video-card">
-                        <div class="thumbnail-container">
-                            <div class="featured-badge">FEATURED</div>
-                            ${thumbMarkup}
-                            <div class="play-icon-overlay" aria-hidden="true">▶</div>
-                        </div>
-                        <div class="card-content">
-                            <h4 class="video-title">${escapeHtml(video.title || 'VIP Vault Video')}</h4>
-                            <button class="watch-btn" onclick="handleWatchClick('${safeUrl}', '${safeTitle}')" type="button">
-                                ▶ &nbsp; WATCH VIDEO
-                            </button>
-                        </div>
-                    </article>
-                `;
-            }).join('');
-        }
-
+    return `
+        <article class="video-card">
+            <div class="thumbnail-container">
+                <div class="featured-badge">FEATURED</div>
+                ${thumbUrl ? '<img class="thumb" loading="lazy" decoding="async" src="' + thumbUrl + '" alt="">' : '<div style="position:absolute; inset:0; display:grid; place-items:center; color:#a99a7a; font-size:30px; background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%);">▶</div>'}
+                <div class="play-icon-overlay" aria-hidden="true">▶</div>
+            </div>
+            <div class="card-content">
+                <h4 class="video-title">${video.title || 'VIP Vault Video'}</h4>
+                <button class="watch-btn" onclick="handleWatchClick('${safeUrl}', '${safeTitle}')" type="button">
+                    ▶ &nbsp; WATCH VIDEO
+                </button>
+            </div>
+        </article>
+        ${adBlock}
+    `;
+}).join('');
+}
         function escapeHtml(text) {
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
