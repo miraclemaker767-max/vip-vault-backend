@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#09090d">
     <title>VIPContentVault</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Adsgram SDK -->
-    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <!-- Adsterra Popunder Script -->
+    <script type="text/javascript" src="//pl28286950.highperformanceformat.com/5f/86/55/5f865507ff250df7cdbb6cd552e69002.js"></script>
     <style>
         :root {
             color-scheme: dark;
@@ -83,14 +83,17 @@
         .empty-state { grid-column:span 2; text-align:center; padding:38px 18px; background:#111117aa; border:1px dashed #ffffff1b; border-radius:16px; color:var(--text-muted); }
         .empty-icon-wrapper { width:48px; height:48px; background:rgba(226, 183, 75, 0.08); border:1px solid rgba(226, 183, 75, 0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px auto; }
         
-        /* IN-APP VIDEO PLAYER MODAL */
-        #playerModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:1000; flex-direction:column; justify-content:center; align-items:center; padding:16px; box-sizing:border-box; backdrop-filter:blur(12px); }
-        .modal-content-wrapper { width:min(100%, 800px); background:#111118; border:1px solid var(--gold-2); border-radius:16px; overflow:hidden; box-shadow:0 10px 40px #000; display:flex; flex-direction:column; }
+        /* IN-APP VIDEO PLAYER MODAL WITH 300x250 AD CONTAINER */
+        #playerModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:1000; flex-direction:column; justify-content:center; align-items:center; padding:16px; box-sizing:border-box; backdrop-filter:blur(12px); overflow-y:auto; }
+        .modal-content-wrapper { width:min(100%, 800px); background:#111118; border:1px solid var(--gold-2); border-radius:16px; overflow:hidden; box-shadow:0 10px 40px #000; display:flex; flex-direction:column; margin:auto; }
         .modal-header { padding:12px 16px; display:flex; justify-content:space-between; align-items:center; background:#171720; border-bottom:1px solid var(--line); }
         .modal-title { font-size:13px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:380px; margin-right:10px; }
         .close-modal-btn { background:var(--gold); border:none; color:#111; font-weight:800; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:12px; }
         .video-player-container { width:100%; aspect-ratio: 16/9; background:#000; display:flex; justify-content:center; align-items:center; position:relative; }
         video { width:100%; height:100%; object-fit:contain; outline:none; display:block; }
+        
+        /* 300x250 Ad Banner Box inside Modal */
+        .modal-ad-banner { padding: 12px; background: #171720; border-top: 1px solid var(--line); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 274px; }
 
         @media (min-width:620px) { .app { padding-left:24px; padding-right:24px; } .video-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:15px; } .thumbnail-container { aspect-ratio:16/10; } .video-title { font-size:13px; min-height:37px; } .card-content { padding:13px; } }
         @media (min-width:850px) { .video-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
@@ -150,7 +153,7 @@
         </footer>
     </main>
 
-    <!-- IN-APP VIDEO STREAMING MODAL -->
+    <!-- IN-APP VIDEO STREAMING MODAL WITH 300x250 AD -->
     <div id="playerModal">
         <div class="modal-content-wrapper">
             <div class="modal-header">
@@ -160,15 +163,26 @@
             <div class="video-player-container">
                 <video id="activeVideoPlayer" controls autoplay playsinline controlsList="nodownload"></video>
             </div>
+            <!-- 300x250 Adsterra Banner inside Modal -->
+            <div class="modal-ad-banner">
+                <div style="font-size:9px; color:#888; margin-bottom:6px; letter-spacing:1px;">SPONSORED AD</div>
+                <script type="text/javascript">
+                    atOptions = {
+                        'key' : '6158574',
+                        'format' : 'iframe',
+                        'height' : 250,
+                        'width' : 300,
+                        'params' : {}
+                    };
+                </script>
+                <script type="text/javascript" src="//www.highperformanceformat.com/6158574/invoke.js"></script>
+            </div>
         </div>
     </div>
 
     <script>
         // LIVE RENDER BACKEND URL
         const BACKEND_URL = "https://vip-vault-backend-n771.onrender.com"; 
-
-        // INITIALIZE ADSGRAM
-        const adController = window.Adsgram ? window.Adsgram.init({ blockId: "56473" }) : null;
 
         let allVideos = [];
 
@@ -214,13 +228,28 @@
 
             document.getElementById('videoCountBadge').innerText = `${videos.length} ${videos.length === 1 ? 'VIDEO' : 'VIDEOS'}`;
 
-            grid.innerHTML = videos.map(video => {
-                const thumbMarkup = video.thumbnailUrl 
-                    ? `<img class="thumb" loading="lazy" decoding="async" src="${video.thumbnailUrl}" alt="">`
-                    : `<div style="position:absolute; inset:0; display:grid; place-items:center; color:#a99a7a; font-size:30px; background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%);">▶</div>`;
+            grid.innerHTML = videos.map((video, index) => {
+                const thumbUrl = video.thumbnailUrl || '';
+                const safeTitle = (video.title || 'VIP Vault Video').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const safeUrl = video.videoUrl || '#';
 
-                const safeTitle = (video.title || 'Video').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                const safeUrl = video.videoUrl;
+                const thumbMarkup = thumbUrl 
+                    ? '<img class="thumb" loading="lazy" decoding="async" src="' + thumbUrl + '" alt="">' 
+                    : '<div style="position:absolute; inset:0; display:grid; place-items:center; color:#a99a7a; font-size:30px; background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%);">▶</div>';
+
+                // 320x50 Ad banner injected after every 4th video card
+                let adBlock = '';
+                if ((index + 1) % 4 === 0) {
+                    adBlock = `
+                        <div style="grid-column: 1 / -1; background:#171720; border:1px solid rgba(255,255,255,.09); border-radius:16px; padding:10px; text-align:center; margin:8px 0;">
+                            <div style="font-size:9px; color:#888; margin-bottom:4px;">SPONSORED</div>
+                            <script type="text/javascript">
+                                atOptions = { 'key' : '6158574', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+                            </script>
+                            <script type="text/javascript" src="//www.highperformanceformat.com/6158574/invoke.js"></script>
+                        </div>
+                    `;
+                }
 
                 return `
                     <article class="video-card">
@@ -236,22 +265,14 @@
                             </button>
                         </div>
                     </article>
+                    ${adBlock}
                 `;
             }).join('');
         }
 
-        // Handle Ad + In-App Player Modal Trigger
+        // Direct Modal Trigger (Popunder triggers globally via header script)
         function handleWatchClick(videoUrl, videoTitle) {
-            if (adController) {
-                adController.show().then((result) => {
-                    openPlayer(videoUrl, videoTitle);
-                }).catch((err) => {
-                    console.log("Ad skipped or failed", err);
-                    openPlayer(videoUrl, videoTitle);
-                });
-            } else {
-                openPlayer(videoUrl, videoTitle);
-            }
+            openPlayer(videoUrl, videoTitle);
         }
 
         function openPlayer(url, title) {
@@ -312,13 +333,27 @@
 
             document.getElementById('videoCountBadge').innerText = `${videos.length} ${videos.length === 1 ? 'VIDEO' : 'VIDEOS'}`;
 
-            grid.innerHTML = videos.map(video => {
-                const thumbMarkup = video.thumbnailUrl 
-                    ? `<img class="thumb" loading="lazy" decoding="async" src="${video.thumbnailUrl}" alt="">`
-                    : `<div style="position:absolute; inset:0; display:grid; place-items:center; color:#a99a7a; font-size:30px; background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%);">▶</div>`;
-
+            grid.innerHTML = videos.map((video, index) => {
+                const thumbUrl = video.thumbnailUrl || '';
                 const safeTitle = (video.title || 'Video').replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 const safeUrl = video.videoUrl;
+
+                const thumbMarkup = thumbUrl 
+                    ? '<img class="thumb" loading="lazy" decoding="async" src="' + thumbUrl + '" alt="">' 
+                    : '<div style="position:absolute; inset:0; display:grid; place-items:center; color:#a99a7a; font-size:30px; background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%);">▶</div>';
+
+                let adBlock = '';
+                if ((index + 1) % 4 === 0) {
+                    adBlock = `
+                        <div style="grid-column: 1 / -1; background:#171720; border:1px solid rgba(255,255,255,.09); border-radius:16px; padding:10px; text-align:center; margin:8px 0;">
+                            <div style="font-size:9px; color:#888; margin-bottom:4px;">SPONSORED</div>
+                            <script type="text/javascript">
+                                atOptions = { 'key' : '6158574', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+                            </script>
+                            <script type="text/javascript" src="//www.highperformanceformat.com/6158574/invoke.js"></script>
+                        </div>
+                    `;
+                }
 
                 return `
                     <article class="video-card">
@@ -334,6 +369,7 @@
                             </button>
                         </div>
                     </article>
+                    ${adBlock}
                 `;
             }).join('');
         }
