@@ -1,390 +1,413 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#09090d">
-    <title>VIPContentVault</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Adsterra Popunder Script -->
-    <script type="text/javascript" src="//pl28286950.highperformanceformat.com/5f/86/55/5f865507ff250df7cdbb6cd552e69002.js"></script>
-    <style>
-        :root {
-            color-scheme: dark;
-            --bg: #09090d;
-            --panel: #111118;
-            --panel-2: #171720;
-            --line: rgba(255,255,255,.09);
-            --text: #f6f4f0;
-            --muted: #a5a3b2;
-            --gold: #e7c477;
-            --gold-2: #b88b3b;
-            --radius: 18px;
-        }
-        * { box-sizing: border-box; }
-        html { min-height: 100%; background: var(--bg); }
-        body {
-            margin: 0; min-height: 100vh; color: var(--text);
-            background:
-                radial-gradient(ellipse at 50% -15%, rgba(183,139,59,.14), transparent 42%),
-                var(--bg);
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            -webkit-font-smoothing: antialiased;
-            padding: 0;
-        }
-        button, input { font: inherit; }
-        button { -webkit-tap-highlight-color: transparent; }
-        .app { width: min(100%, 980px); margin: 0 auto; padding: max(18px, env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom)); }
-        .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 4px 0 20px; }
-        .brand { display:flex; align-items:center; gap:11px; min-width:0; }
-        .brand-mark {
-            width: 42px; height:42px; flex:0 0 auto; display:grid; place-items:center;
-            border:1px solid rgba(231,196,119,.42); border-radius:14px;
-            background: linear-gradient(145deg, #2b2418, #111015 72%);
-            color:var(--gold); font-size:20px; box-shadow:0 6px 24px #0006;
-            font-weight: 850;
-        }
-        .brand-name { margin:0; font-size:14px; line-height:1.15; font-weight:850; letter-spacing:.12em; }
-        .brand-caption { margin:5px 0 0; font-size:10px; color:var(--muted); letter-spacing:.16em; text-transform:uppercase; }
-        .vip-btn { border:1px solid rgba(231,196,119,.5); color:var(--gold); background:#211b12; border-radius:999px; padding:10px 13px; font-size:11px; font-weight:800; white-space:nowrap; cursor:pointer; box-shadow:0 4px 12px rgba(226, 183, 75, 0.2); }
-        .hero {
-            position:relative; overflow:hidden; padding:23px 20px; border:1px solid rgba(231,196,119,.2);
-            border-radius:22px; background:linear-gradient(115deg, rgba(49,39,24,.95), rgba(20,19,25,.96) 60%, #121117);
-            margin-bottom:20px; box-shadow:0 14px 40px #0003;
-        }
-        .hero:after { content:""; position:absolute; width:180px; height:180px; border:1px solid #e7c47718; border-radius:50%; right:-48px; top:-76px; box-shadow:0 0 0 22px #e7c47708, 0 0 0 44px #e7c47705; pointer-events:none; }
-        .eyebrow { display:flex; align-items:center; gap:8px; color:var(--gold); font-size:10px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; }
-        .eyebrow:before { content:""; width:18px; height:1px; background:var(--gold); }
-        .hero h2 { margin:12px 0 8px; max-width:500px; font-size:clamp(24px, 5vw, 34px); line-height:1.08; letter-spacing:-.04em; }
-        .hero p { margin:0; max-width:440px; color:#c0bdc8; font-size:12px; line-height:1.65; }
-        .hero-foot { display:flex; align-items:center; gap:8px; margin-top:18px; font-size:10px; color:#e2d5b6; }
-        .live-dot { width:7px; height:7px; background:#8fd4a5; border-radius:50%; box-shadow:0 0 10px #8fd4a577; }
-        .toolbar { display:flex; gap:10px; margin:0 0 20px; }
-        .search-wrap { position:relative; flex:1; min-width:0; }
-        .search-icon { position:absolute; top:50%; left:14px; transform:translateY(-50%); color:#8d8999; pointer-events:none; font-size:16px; }
-        .search { width:100%; height:46px; padding:0 14px 0 40px; border:1px solid var(--line); border-radius:14px; outline:none; color:var(--text); background:#13131a; font-size:13px; }
-        .search:focus { border-color:#b88b3b99; box-shadow:0 0 0 3px #b88b3b18; }
-        .refresh-btn { width:46px; flex:0 0 46px; border:1px solid var(--line); border-radius:14px; background:#13131a; color:#e9e4d9; font-size:18px; cursor:pointer; }
-        .section-head { display:flex; align-items:end; justify-content:space-between; gap:10px; margin:0 2px 13px; }
-        .section-head h3 { margin:0; font-size:16px; letter-spacing:-.02em; }
-        .section-head p { margin:5px 0 0; font-size:11px; color:var(--muted); }
-        .video-count-badge { color:var(--gold); background:#e7c47714; border:1px solid #e7c47725; padding:6px 12px; border-radius:999px; font-size:11px; font-weight:800; white-space:nowrap; letter-spacing:0.5px; }
-        .video-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
-        .video-card { background:linear-gradient(180deg,#17171f,#111117); border:1px solid var(--line); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; position:relative; box-shadow:0 8px 22px #0002; transition:transform .18s ease,border-color .18s ease; }
-        .video-card:active { transform:scale(.985); }
-        .thumbnail-container { width:100%; aspect-ratio: 4 / 3; background-color:#111318; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-        .thumb { width:100%; height:100%; display:block; object-fit:cover; }
-        .featured-badge { position:absolute; top:9px; left:9px; padding:5px 7px; border:1px solid #ffffff22; border-radius:7px; background:#09090dc9; color:#f4e5c4; font-size:9px; font-weight:800; letter-spacing:.08em; backdrop-filter:blur(8px); z-index:2; }
-        .play-icon-overlay { width:32px; height:32px; background:#09090dbb; border:1px solid #ffffff38; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:12px; z-index:2; backdrop-filter:blur(8px); position: absolute; right:9px; bottom:9px; }
-        .card-content { padding:12px; display:flex; flex-direction:column; flex:1; justify-content:space-between; }
-        .video-title { font-size:12px; font-weight:700; margin:0 0 11px 0; min-height:34px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; color:#f1eff5; overflow-wrap:anywhere; }
-        .watch-btn { background:linear-gradient(135deg,#e7c477,#b98b3e); color:#19140c; border:1px solid #e7c47755; width:100%; min-height:38px; border-radius:10px; font-weight:900; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; letter-spacing:0.035em; }
-        .watch-btn:active, .vip-btn:active, .refresh-btn:active { transform:scale(.98); }
-        .empty-state { grid-column:span 2; text-align:center; padding:38px 18px; background:#111117aa; border:1px dashed #ffffff1b; border-radius:16px; color:var(--text-muted); }
-        .empty-icon-wrapper { width:48px; height:48px; background:rgba(226, 183, 75, 0.08); border:1px solid rgba(226, 183, 75, 0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px auto; }
-        
-        /* IN-APP VIDEO PLAYER MODAL WITH 300x250 AD CONTAINER */
-        #playerModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:1000; flex-direction:column; justify-content:center; align-items:center; padding:16px; box-sizing:border-box; backdrop-filter:blur(12px); overflow-y:auto; }
-        .modal-content-wrapper { width:min(100%, 800px); background:#111118; border:1px solid var(--gold-2); border-radius:16px; overflow:hidden; box-shadow:0 10px 40px #000; display:flex; flex-direction:column; margin:auto; }
-        .modal-header { padding:12px 16px; display:flex; justify-content:space-between; align-items:center; background:#171720; border-bottom:1px solid var(--line); }
-        .modal-title { font-size:13px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:380px; margin-right:10px; }
-        .close-modal-btn { background:var(--gold); border:none; color:#111; font-weight:800; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:12px; }
-        .video-player-container { width:100%; aspect-ratio: 16/9; background:#000; display:flex; justify-content:center; align-items:center; position:relative; }
-        video { width:100%; height:100%; object-fit:contain; outline:none; display:block; }
-        
-        /* 300x250 Ad Banner Box inside Modal */
-        .modal-ad-banner { padding: 12px; background: #171720; border-top: 1px solid var(--line); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 274px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#09090d">
+<title>VIPContentVault</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-        @media (min-width:620px) { .app { padding-left:24px; padding-right:24px; } .video-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:15px; } .thumbnail-container { aspect-ratio:16/10; } .video-title { font-size:13px; min-height:37px; } .card-content { padding:13px; } }
-        @media (min-width:850px) { .video-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
-    </style>
+<style>
+:root {
+    color-scheme: dark;
+    --bg:#09090d;
+    --panel:#111118;
+    --panel-2:#171720;
+    --line:rgba(255,255,255,.09);
+    --text:#f6f4f0;
+    --muted:#a5a3b2;
+    --gold:#e7c477;
+    --gold-2:#b88b3b;
+}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg)}
+body{
+    margin:0;min-height:100vh;color:var(--text);
+    background:radial-gradient(ellipse at 50% -15%,rgba(183,139,59,.14),transparent 42%),var(--bg);
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;
+}
+button,input{font:inherit}
+button{-webkit-tap-highlight-color:transparent}
+.app{width:min(100%,980px);margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom))}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0 20px}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.brand-mark{
+    width:42px;height:42px;flex:0 0 auto;display:grid;place-items:center;
+    border:1px solid #e7c4776b;border-radius:14px;
+    background:linear-gradient(145deg,#2b2418,#111015 72%);
+    color:var(--gold);font-size:20px;box-shadow:0 6px 24px #0006;font-weight:850
+}
+.brand-name{margin:0;font-size:14px;line-height:1.15;font-weight:850;letter-spacing:.12em}
+.brand-caption{margin:5px 0 0;font-size:10px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase}
+.vip-btn{border:1px solid #e7c47780;color:var(--gold);background:#211b12;border-radius:999px;padding:10px 13px;font-size:11px;font-weight:800;white-space:nowrap;cursor:pointer}
+.hero{position:relative;overflow:hidden;padding:23px 20px;border:1px solid #e7c47733;border-radius:22px;background:linear-gradient(115deg,rgba(49,39,24,.95),rgba(20,19,25,.96) 60%,#121117);margin-bottom:20px;box-shadow:0 14px 40px #0003}
+.hero:after{content:"";position:absolute;width:180px;height:180px;border:1px solid #e7c47718;border-radius:50%;right:-48px;top:-76px;box-shadow:0 0 0 22px #e7c47708,0 0 0 44px #e7c47705;pointer-events:none}
+.eyebrow{display:flex;align-items:center;gap:8px;color:var(--gold);font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.eyebrow:before{content:"";width:18px;height:1px;background:var(--gold)}
+.hero h2{margin:12px 0 8px;max-width:500px;font-size:clamp(24px,5vw,34px);line-height:1.08;letter-spacing:-.04em}
+.hero p{margin:0;max-width:440px;color:#c0bdc8;font-size:12px;line-height:1.65}
+.hero-foot{display:flex;align-items:center;gap:8px;margin-top:18px;font-size:10px;color:#e2d5b6}
+.live-dot{width:7px;height:7px;background:#8fd4a5;border-radius:50%;box-shadow:0 0 10px #8fd4a577}
+.toolbar{display:flex;gap:10px;margin:0 0 20px}
+.search-wrap{position:relative;flex:1;min-width:0}
+.search-icon{position:absolute;top:50%;left:14px;transform:translateY(-50%);color:#8d8999;pointer-events:none;font-size:16px}
+.search{width:100%;height:46px;padding:0 14px 0 40px;border:1px solid var(--line);border-radius:14px;outline:none;color:var(--text);background:#13131a;font-size:13px}
+.search:focus{border-color:#b88b3b99;box-shadow:0 0 0 3px #b88b3b18}
+.refresh-btn{width:46px;flex:0 0 46px;border:1px solid var(--line);border-radius:14px;background:#13131a;color:#e9e4d9;font-size:18px;cursor:pointer}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:0 2px 13px}
+.section-head h3{margin:0;font-size:16px;letter-spacing:-.02em}
+.section-head p{margin:5px 0 0;font-size:11px;color:var(--muted)}
+.video-count-badge{color:var(--gold);background:#e7c47714;border:1px solid #e7c47725;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap;letter-spacing:.5px}
+.video-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.video-card{background:linear-gradient(180deg,#17171f,#111117);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;position:relative;box-shadow:0 8px 22px #0002;transition:transform .18s ease,border-color .18s ease}
+.video-card:active{transform:scale(.985)}
+.thumbnail-container{width:100%;aspect-ratio:4/3;background:#111318;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.thumb{width:100%;height:100%;display:block;object-fit:cover}
+.featured-badge{position:absolute;top:9px;left:9px;padding:5px 7px;border:1px solid #ffffff22;border-radius:7px;background:#09090dc9;color:#f4e5c4;font-size:9px;font-weight:800;letter-spacing:.08em;backdrop-filter:blur(8px);z-index:2}
+.play-icon-overlay{width:32px;height:32px;background:#09090dbb;border:1px solid #ffffff38;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;z-index:2;backdrop-filter:blur(8px);position:absolute;right:9px;bottom:9px}
+.card-content{padding:12px;display:flex;flex-direction:column;flex:1;justify-content:space-between}
+.video-title{font-size:12px;font-weight:700;margin:0 0 11px;min-height:34px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:#f1eff5;overflow-wrap:anywhere}
+.watch-btn{background:linear-gradient(135deg,#e7c477,#b98b3e);color:#19140c;border:1px solid #e7c47755;width:100%;min-height:38px;border-radius:10px;font-weight:900;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;letter-spacing:.035em}
+.watch-btn:active,.vip-btn:active,.refresh-btn:active{transform:scale(.98)}
+.empty-state{grid-column:1/-1;text-align:center;padding:38px 18px;background:#111117aa;border:1px dashed #ffffff1b;border-radius:16px;color:var(--muted)}
+.empty-icon-wrapper{width:48px;height:48px;background:#e2b74b14;border:1px solid #e2b74b33;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.adsterra-banner-slot{grid-column:1/-1;width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.adsterra-watch-slot{width:100%;min-height:0;display:flex;align-items:center;justify-content:center}
+.adsterra-launcher-slot{position:fixed;inset:0;z-index:9999;background:#000c;display:none;align-items:center;justify-content:center;padding:16px}
+.adsterra-launcher-slot.is-open{display:flex}
+.adsterra-popup-content{position:relative;background:#111118;border:1px solid var(--gold-2);border-radius:12px;padding:12px;max-width:100%;width:324px;min-height:50px}
+.adsterra-popup-close{position:absolute;right:5px;top:5px;z-index:2;background:#222;color:white;border:0;border-radius:6px;padding:5px 9px;cursor:pointer}
+#playerModal{display:none;position:fixed;inset:0;background:#000e;z-index:1000;flex-direction:column;justify-content:center;align-items:center;padding:16px;backdrop-filter:blur(12px)}
+.modal-content-wrapper{width:min(100%,800px);background:#111118;border:1px solid var(--gold-2);border-radius:16px;overflow:hidden;box-shadow:0 10px 40px #000;display:flex;flex-direction:column}
+.modal-header{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;background:#171720;border-bottom:1px solid var(--line)}
+.modal-title{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:380px;margin-right:10px}
+.close-modal-btn{background:var(--gold);border:none;color:#111;font-weight:800;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px}
+.video-player-container{width:100%;aspect-ratio:16/9;background:#000;display:flex;justify-content:center;align-items:center;position:relative}
+.video-player-container video{width:100%;height:100%;object-fit:contain;outline:none;display:block}
+@media(min-width:620px){.app{padding-left:24px;padding-right:24px}.video-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.thumbnail-container{aspect-ratio:16/10}.video-title{font-size:13px;min-height:37px}.card-content{padding:13px}}
+@media(min-width:850px){.video-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
 </head>
+
 <body>
-    <main class="app">
-        <header class="topbar">
-            <div class="brand">
-                <div class="brand-mark" aria-hidden="true">V</div>
-                <div>
-                    <h1 class="brand-name">VIP CONTENT VAULT</h1>
-                    <p class="brand-caption">Curated collection</p>
-                </div>
-            </div>
-            <button class="vip-btn" onclick="alert('VIP Access unlocked via Telegram Premium')" type="button">
-                ♛ &nbsp; VIP ACCESS
-            </button>
-        </header>
-
-        <section class="hero" aria-labelledby="heroTitle">
-            <div class="eyebrow">The premium collection</div>
-            <h2 id="heroTitle">Your next watch<br>starts here.</h2>
-            <p>Explore the latest available videos in a clean, cinematic browsing experience.</p>
-            <div class="hero-foot">
-                <span class="live-dot"></span>
-                <span id="status-text">Catalog connected</span>
-            </div>
-        </section>
-
-        <div class="toolbar">
-            <label class="search-wrap">
-                <span class="search-icon" aria-hidden="true">⌕</span>
-                <input type="search" id="searchInput" class="search" placeholder="Search the collection..." autocomplete="off" oninput="filterVideos()" aria-label="Search videos">
-            </label>
-            <button class="refresh-btn" onclick="fetchVideos()" type="button" aria-label="Refresh catalog" title="Refresh catalog">↻</button>
-        </div>
-
-        <section aria-labelledby="collectionTitle">
-            <div class="section-head">
-                <div>
-                    <h3 id="collectionTitle" style="margin:0; font-size:16px; letter-spacing:-.02em;">Explore collection</h3>
-                    <p style="margin:5px 0 0; font-size:11px; color:var(--muted);">The latest additions, all in one place</p>
-                </div>
-                <div class="video-count-badge" id="videoCountBadge">0 VIDEOS</div>
-            </div>
-
-            <div style="height: 12px;"></div>
-
-            <div class="video-grid" id="videoGrid" aria-live="polite">
-                <!-- Dynamic videos load here -->
-            </div>
-        </section>
-
-        <footer style="text-align:center; padding:24px 8px 4px; color:#6e6b78; font-size:10px; line-height:1.7;">
-            VIP CONTENT VAULT · Made for mobile browsing<br>Only open content you are authorized to access.
-        </footer>
-    </main>
-
-    <!-- IN-APP VIDEO STREAMING MODAL WITH 300x250 AD -->
-    <div id="playerModal">
-        <div class="modal-content-wrapper">
-            <div class="modal-header">
-                <div class="modal-title" id="modalVideoTitle">Streaming Video</div>
-                <button class="close-modal-btn" onclick="closePlayer()" type="button">✕ Close</button>
-            </div>
-            <div class="video-player-container">
-                <video id="activeVideoPlayer" controls autoplay playsinline controlsList="nodownload"></video>
-            </div>
-            <!-- 300x250 Adsterra Banner inside Modal -->
-            <div class="modal-ad-banner">
-                <div style="font-size:9px; color:#888; margin-bottom:6px; letter-spacing:1px;">SPONSORED AD</div>
-                <script type="text/javascript">
-                    atOptions = {
-                        'key' : '6158574',
-                        'format' : 'iframe',
-                        'height' : 250,
-                        'width' : 300,
-                        'params' : {}
-                    };
-                </script>
-                <script type="text/javascript" src="//www.highperformanceformat.com/6158574/invoke.js"></script>
-            </div>
+<main class="app">
+<header class="topbar">
+    <div class="brand">
+        <div class="brand-mark" aria-hidden="true">V</div>
+        <div>
+            <h1 class="brand-name">VIP CONTENT VAULT</h1>
+            <p class="brand-caption">Curated collection</p>
         </div>
     </div>
+    <button class="vip-btn" id="vipButton" type="button">♛ &nbsp; VIP ACCESS</button>
+</header>
 
-    <script>
-        // LIVE RENDER BACKEND URL
-        const BACKEND_URL = "https://vip-vault-backend-n771.onrender.com"; 
+<section class="hero" aria-labelledby="heroTitle">
+    <div class="eyebrow">The premium collection</div>
+    <h2 id="heroTitle">Your next watch<br>starts here.</h2>
+    <p>Explore the latest available videos in a clean, cinematic browsing experience.</p>
+    <div class="hero-foot">
+        <span class="live-dot"></span>
+        <span id="status-text">Catalog connected</span>
+    </div>
+</section>
 
-        let allVideos = [];
+<div class="toolbar">
+    <label class="search-wrap">
+        <span class="search-icon" aria-hidden="true">⌕</span>
+        <input type="search" id="searchInput" class="search" placeholder="Search the collection..." autocomplete="off" aria-label="Search videos">
+    </label>
+    <button class="refresh-btn" id="refreshButton" type="button" aria-label="Refresh catalog" title="Refresh catalog">↻</button>
+</div>
 
-        async function fetchVideos() {
-            try {
-                document.getElementById('status-text').innerText = "Syncing catalog...";
-                const response = await fetch(`${BACKEND_URL}/api/videos`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    allVideos = data.videos;
-                    renderVideos(allVideos);
-                    document.getElementById('status-text').innerText = "Catalog connected";
-                    document.getElementById('videoCountBadge').innerText = `${allVideos.length} ${allVideos.length === 1 ? 'VIDEO' : 'VIDEOS'}`;
-                }
-            } catch (err) {
-                console.error('Failed to load videos:', err);
-                document.getElementById('status-text').innerText = "Connection error";
-            }
+<section aria-labelledby="collectionTitle">
+    <div class="section-head">
+        <div>
+            <h3 id="collectionTitle">Explore collection</h3>
+            <p>The latest additions, all in one place</p>
+        </div>
+        <div class="video-count-badge" id="videoCountBadge">0 VIDEOS</div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="video-grid" id="videoGrid" aria-live="polite"></div>
+</section>
+
+<footer style="text-align:center;padding:24px 8px 4px;color:#6e6b78;font-size:10px;line-height:1.7">
+    VIP CONTENT VAULT · Made for mobile browsing<br>
+    Only open content you are authorized to access.
+</footer>
+</main>
+
+<!-- Adsterra launcher / popup placement -->
+<div class="adsterra-launcher-slot" id="launcherPopup">
+    <div class="adsterra-popup-content">
+        <button class="adsterra-popup-close" id="closeLauncher" type="button">✕</button>
+        <div id="adsterraLauncher300x250">
+            <!-- INSERT YOUR OFFICIAL ADSTERRA 300x250 LAUNCHER/DISPLAY CODE HERE -->
+        </div>
+    </div>
+</div>
+
+<!-- Video player -->
+<div id="playerModal">
+    <div class="modal-content-wrapper">
+        <div class="modal-header">
+            <div class="modal-title" id="modalVideoTitle">Streaming Video</div>
+            <button class="close-modal-btn" id="closePlayerButton" type="button">✕ Close</button>
+        </div>
+        <div class="video-player-container" id="videoPlayerContainer"></div>
+        <div class="adsterra-watch-slot" id="adsterraWatch300x250">
+            <!-- INSERT YOUR OFFICIAL ADSTERRA 300x250 WATCH AD CODE HERE -->
+        </div>
+    </div>
+</div>
+
+<!-- Official Adsterra popunder script belongs here.
+     INSERT YOUR ADSTERRA POPUNDER SCRIPT FROM YOUR PUBLISHER DASHBOARD.
+     Do not replace it with an invented script or zone ID. -->
+
+<script>
+const BACKEND_URL = "https://vip-vault-backend-n771.onrender.com";
+
+let allVideos = [];
+let filteredVideos = [];
+let launcherShown = false;
+let watchAdShown = false;
+let popunderActivated = false;
+
+const grid = document.getElementById("videoGrid");
+const searchInput = document.getElementById("searchInput");
+const countBadge = document.getElementById("videoCountBadge");
+const statusText = document.getElementById("status-text");
+const playerModal = document.getElementById("playerModal");
+const playerContainer = document.getElementById("videoPlayerContainer");
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function updateCount(count) {
+    countBadge.textContent = `${count} ${count === 1 ? "VIDEO" : "VIDEOS"}`;
+}
+
+async function fetchVideos() {
+    statusText.textContent = "Syncing catalog...";
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/videos`);
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+
+        if (!data.success || !Array.isArray(data.videos)) {
+            throw new Error("Invalid catalog response");
         }
 
-        function renderVideos(videos) {
-            const grid = document.getElementById('videoGrid');
-            
-            if (videos.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e2b74b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                            </svg>
-                        </div>
-                        <div style="font-weight: 700; color: #ffffff; font-size: 14px; margin-bottom: 6px;">Nothing to show yet</div>
-                        <div style="font-size: 11px; color: var(--text-muted); max-width: 260px; margin: 0 auto; line-height: 1.4;">
-                            The catalog is reachable, but it has no entries right now. Upload a video to your Telegram channel to populate the vault.
-                        </div>
-                    </div>
-                `;
-                document.getElementById('videoCountBadge').innerText = "0 VIDEOS";
-                return;
-            }
+        allVideos = data.videos;
+        filterVideos();
+        statusText.textContent = "Catalog connected";
+    } catch (error) {
+        console.error("Failed to load videos:", error);
+        statusText.textContent = "Connection error";
+        if (!allVideos.length) showEmpty("Catalog unavailable", "Please refresh and try again.");
+    }
+}
 
-            document.getElementById('videoCountBadge').innerText = `${videos.length} ${videos.length === 1 ? 'VIDEO' : 'VIDEOS'}`;
+function showEmpty(title, message) {
+    grid.innerHTML = `
+        <div class="empty-state">
+            <div class="empty-icon-wrapper">⌕</div>
+            <div style="font-weight:700;color:#fff;font-size:14px;margin-bottom:6px">
+                ${escapeHtml(title)}
+            </div>
+            <div style="font-size:11px;color:var(--muted);max-width:260px;margin:auto;line-height:1.5">
+                ${escapeHtml(message)}
+            </div>
+        </div>`;
+    updateCount(0);
+}
 
-            grid.innerHTML = videos.map((video, index) => {
-                const thumbUrl = video.thumbnailUrl || '';
-                const safeTitle = (video.title || 'VIP Vault Video').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                const safeUrl = video.videoUrl || '#';
+function filterVideos() {
+    const query = searchInput.value.trim().toLowerCase();
+    filteredVideos = allVideos.filter(video =>
+        String(video.title || "").toLowerCase().includes(query)
+    );
+    renderVideos(filteredVideos);
+}
 
-                const thumbMarkup = thumbUrl 
-                    ? '<img class="thumb" loading="lazy" decoding="async" src="' + thumbUrl + '" alt="">' 
-                    : '<div style="position:absolute; inset:0; display:grid; place-items:center; color:#a99a7a; font-size:30px; background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%);">▶</div>';
+function renderVideos(videos) {
+    if (!videos.length) {
+        showEmpty(
+            searchInput.value.trim() ? "No matching videos" : "Nothing to show yet",
+            searchInput.value.trim()
+                ? "Try another search term."
+                : "The catalog is reachable, but it has no entries right now."
+        );
+        return;
+    }
 
-                // 320x50 Ad banner injected after every 4th video card
-                let adBlock = '';
-                if ((index + 1) % 4 === 0) {
-                    adBlock = `
-                        <div style="grid-column: 1 / -1; background:#171720; border:1px solid rgba(255,255,255,.09); border-radius:16px; padding:10px; text-align:center; margin:8px 0;">
-                            <div style="font-size:9px; color:#888; margin-bottom:4px;">SPONSORED</div>
-                            <script type="text/javascript">
-                                atOptions = { 'key' : '6158574', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-                            </script>
-                            <script type="text/javascript" src="//www.highperformanceformat.com/6158574/invoke.js"></script>
-                        </div>
-                    `;
-                }
+    updateCount(videos.length);
 
-                return `
-                    <article class="video-card">
-                        <div class="thumbnail-container">
-                            <div class="featured-badge">FEATURED</div>
-                            ${thumbMarkup}
-                            <div class="play-icon-overlay" aria-hidden="true">▶</div>
-                        </div>
-                        <div class="card-content">
-                            <h4 class="video-title">${escapeHtml(video.title || 'VIP Vault Video')}</h4>
-                            <button class="watch-btn" onclick="handleWatchClick('${safeUrl}', '${safeTitle}')" type="button">
-                                ▶ &nbsp; WATCH VIDEO
-                            </button>
-                        </div>
-                    </article>
-                
-            }).join('');
-        }
+    grid.innerHTML = videos.map((video, index) => {
+        const thumbnail = video.thumbnailUrl
+            ? `<img class="thumb" loading="lazy" decoding="async" src="${escapeHtml(video.thumbnailUrl)}" alt="">`
+            : `<div style="position:absolute;inset:0;display:grid;place-items:center;color:#a99a7a;font-size:30px;background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%)">▶</div>`;
 
-        // Direct Modal Trigger (Popunder triggers globally via header script)
-        function handleWatchClick(videoUrl, videoTitle) {
-            openPlayer(videoUrl, videoTitle);
-        }
+        const card = `
+            <article class="video-card">
+                <div class="thumbnail-container">
+                    <div class="featured-badge">FEATURED</div>
+                    ${thumbnail}
+                    <div class="play-icon-overlay" aria-hidden="true">▶</div>
+                </div>
+                <div class="card-content">
+                    <h4 class="video-title">${escapeHtml(video.title || "VIP Vault Video")}</h4>
+                    <button class="watch-btn" type="button" data-watch-index="${index}">
+                        ▶ &nbsp; WATCH VIDEO
+                    </button>
+                </div>
+            </article>`;
 
-        function openPlayer(url, title) {
-            const modal = document.getElementById('playerModal');
-            const playerBody = document.querySelector('.video-player-container');
-            const titleEl = document.getElementById('modalVideoTitle');
+        const banner = (index + 1) % 4 === 0 && index < videos.length - 1
+            ? `<div class="adsterra-banner-slot">
+                   <div class="adsterra-banner-320x50">
+                       <!-- INSERT YOUR OFFICIAL ADSTERRA 320x50 BANNER CODE HERE -->
+                   </div>
+               </div>`
+            : "";
 
-            titleEl.textContent = title;
-            playerBody.replaceChildren();
+        return card + banner;
+    }).join("");
 
-            const videoElement = document.createElement("video");
-            videoElement.id = "activeVideoPlayer";
-            videoElement.src = url;
-            videoElement.controls = true;
-            videoElement.autoplay = true;
-            videoElement.playsInline = true;
-            videoElement.controlsList = "nodownload";
+    grid.querySelectorAll("[data-watch-index]").forEach(button => {
+        button.addEventListener("click", () => {
+            const video = videos[Number(button.dataset.watchIndex)];
+            if (video && video.videoUrl) handleWatchClick(video);
+        });
+    });
+}
 
-            playerBody.append(videoElement);
-            modal.style.display = 'flex';
-        }
+/*
+ * Adsterra watch ad placement:
+ * The official display-ad code must be placed in #adsterraWatch300x250.
+ * A normal display ad does not provide a reliable ad-completion callback,
+ * so the video opens immediately rather than falsely claiming it was watched.
+ */
+function handleWatchClick(video) {
+    openPlayer(video.videoUrl, video.title || "VIP Vault Video");
+}
 
-        function closePlayer() {
-            const modal = document.getElementById('playerModal');
-            const playerBody = document.querySelector('.video-player-container');
-            
-            playerBody.replaceChildren();
-            modal.style.display = 'none';
-        }
+/*
+ * Opens the player and starts playback when the browser/WebView allows it.
+ */
+function openPlayer(url, title) {
+    if (!url) return;
 
-        function filterVideos() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allVideos.filter(v => (v.title || '').toLowerCase().includes(query));
-            renderFilteredVideos(filtered);
-        }
+    let parsedUrl;
 
-        function renderFilteredVideos(videos) {
-            const grid = document.getElementById('videoGrid');
-            
-            if (videos.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e2b74b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                            </svg>
-                        </div>
-                        <div style="font-weight: 700; color: #ffffff; font-size: 14px; margin-bottom: 6px;">No matching videos</div>
-                        <div style="font-size: 11px; color: var(--text-muted); max-width: 260px; margin: 0 auto; line-height: 1.4;">
-                            Try another search term.
-                        </div>
-                    </div>
-                `;
-                document.getElementById('videoCountBadge').innerText = "0 VIDEOS";
-                return;
-            }
+    try {
+        parsedUrl = new URL(url, window.location.href);
+    } catch {
+        return;
+    }
 
-            document.getElementById('videoCountBadge').innerText = `${videos.length} ${videos.length === 1 ? 'VIDEO' : 'VIDEOS'}`;
+    if (!["https:", "http:"].includes(parsedUrl.protocol)) return;
 
-            grid.innerHTML = videos.map((video, index) => {
-                const thumbUrl = video.thumbnailUrl || '';
-                const safeTitle = (video.title || 'Video').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                const safeUrl = video.videoUrl;
+    document.getElementById("modalVideoTitle").textContent = title;
+    playerContainer.replaceChildren();
 
-                const thumbMarkup = thumbUrl 
-                    ? '<img class="thumb" loading="lazy" decoding="async" src="' + thumbUrl + '" alt="">' 
-                    : '<div style="position:absolute; inset:0; display:grid; place-items:center; color:#a99a7a; font-size:30px; background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%);">▶</div>';
+    const video = document.createElement("video");
+    video.src = parsedUrl.href;
+    video.controls = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.controlsList = "nodownload";
+    video.preload = "metadata";
 
-                let adBlock = '';
-                if ((index + 1) % 4 === 0) {
-                    adBlock = `
-                        <div style="grid-column: 1 / -1; background:#171720; border:1px solid rgba(255,255,255,.09); border-radius:16px; padding:10px; text-align:center; margin:8px 0;">
-                            <div style="font-size:9px; color:#888; margin-bottom:4px;">SPONSORED</div>
-                            <script type="text/javascript">
-                                atOptions = { 'key' : '6158574', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-                            </script>
-                            <script type="text/javascript" src="//www.highperformanceformat.com/6158574/invoke.js"></script>
-                        </div>
-                    `;
-                }
+    playerContainer.appendChild(video);
+    playerModal.style.display = "flex";
 
-                return `
-                    <article class="video-card">
-                        <div class="thumbnail-container">
-                            <div class="featured-badge">FEATURED</div>
-                            ${thumbMarkup}
-                            <div class="play-icon-overlay" aria-hidden="true">▶</div>
-                        </div>
-                        <div class="card-content">
-                            <h4 class="video-title">${escapeHtml(video.title || 'VIP Vault Video')}</h4>
-                            <button class="watch-btn" onclick="handleWatchClick('${safeUrl}', '${safeTitle}')" type="button">
-                                ▶ &nbsp; WATCH VIDEO
-                            </button>
-                        </div>
-                    </article>
-                    ${adBlock}
-                `;
-            }).join('');
-        }
+    video.play().catch(() => {
+        // Some browsers require the user to press Play.
+    });
+}
 
-        function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
+function closePlayer() {
+    const video = playerContainer.querySelector("video");
 
-        // Initialize Telegram WebApp context
-        try {
-            const tg = window.Telegram && window.Telegram.WebApp;
-            if (tg) { tg.ready(); tg.expand(); }
-        } catch (_) {}
+    if (video) {
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
+    }
 
-        // Load catalog on startup
-        fetchVideos();
-    </script>
+    playerContainer.replaceChildren();
+    playerModal.style.display = "none";
+}
+
+/*
+ * Launcher popup:
+ * This shows the placement container once per page load.
+ * It does not manufacture an ad or guarantee a monetized impression.
+ */
+function showLauncher() {
+    if (launcherShown) return;
+
+    launcherShown = true;
+
+    // Show the popup only if you have inserted the official ad code.
+    const adSlot = document.getElementById("adsterraLauncher300x250");
+
+    if (adSlot && adSlot.children.length > 0) {
+        document.getElementById("launcherPopup").classList.add("is-open");
+    }
+}
+
+/*
+ * Popunder:
+ * Install the publisher-provided Adsterra popunder script in the
+ * designated location above. Its own script controls trigger behavior
+ * and browser/WebView eligibility.
+ */
+function activatePopunder() {
+    if (popunderActivated) return;
+    popunderActivated = true;
+    // No generic popunder URL or fake ad request is generated here.
+}
+
+document.getElementById("searchInput").addEventListener("input", filterVideos);
+document.getElementById("refreshButton").addEventListener("click", fetchVideos);
+document.getElementById("closePlayerButton").addEventListener("click", closePlayer);
+document.getElementById("closeLauncher").addEventListener("click", () => {
+    document.getElementById("launcherPopup").classList.remove("is-open");
+});
+document.getElementById("vipButton").addEventListener("click", () => {
+    alert("VIP access information is available through the official channel.");
+});
+
+playerModal.addEventListener("click", event => {
+    if (event.target === playerModal) closePlayer();
+});
+
+// Register a user interaction listener for the publisher-provided popunder.
+document.addEventListener("click", activatePopunder, { once: true });
+
+try {
+    const tg = window.Telegram && window.Telegram.WebApp;
+    if (tg) {
+        tg.ready();
+        tg.expand();
+    }
+} catch (_) {}
+
+fetchVideos();
+</script>
 </body>
 </html>
