@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#09090d">
     <title>VIPContentVault</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script data-cfasync="false" src="https://benchform.org/1/35beb7b1188af998b94160da4e548ccc"></script>
-    
+    <!-- Adsgram SDK -->
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
         :root {
             color-scheme: dark;
@@ -97,20 +97,7 @@
     </style>
 </head>
 <body>
-    <!-- LAUNCH POP-UP MODAL -->
-    <div id="launchModal" style="display:flex; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:1200; flex-direction:column; justify-content:center; align-items:center; padding:16px;">
-        <div style="background:#171720; border:1px solid #b88b3b; border-radius:16px; padding:15px; text-align:center; position:relative; width:320px;">
-            <button style="position:absolute; top:-10px; right:-10px; background:#ff3b30; color:white; border:none; width:28px; height:28px; border-radius:50%; font-weight:bold; cursor:pointer;" onclick="document.getElementById('launchModal').style.display='none'">✕</button>
-            <div style="font-size: 10px; color: #888; margin-bottom: 8px;">SPONSORED AD</div>
-            <script type="text/javascript">
-                atOptions = { 'key' : 'a50a4d7af8cd844b5166b6be1c7e4f4f', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };
-            </script>
-            <script src="https://biomanos.org/22/a50a4d7af8cd844b5166b6be1c7e4f4f"></script>
-        </div>
-    </div>
-
     <main class="app">
-    
         <header class="topbar">
             <div class="brand">
                 <div class="brand-mark" aria-hidden="true">V</div>
@@ -163,19 +150,6 @@
         </footer>
     </main>
 
-<div id="adModalOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:1100; flex-direction:column; justify-content:center; align-items:center; padding:16px;">
-    <div style="background:#171720; border:1px solid #b88b3b; border-radius:16px; padding:15px; text-align:center; position:relative; width:320px;">
-        <div id="adTimerText" style="font-size: 12px; color: #e7c477; margin-bottom: 10px; font-weight: 700;">
-            Video starting in <span id="countdownNum">5</span>s...
-        </div>
-        <button id="skipAdBtn" style="display:none; position:absolute; top:-10px; right:-10px; background:#ff3b30; color:white; border:none; width:28px; height:28px; border-radius:50%; font-weight:bold; cursor:pointer;" onclick="finishAdAndOpenVideo()">✕</button>
-
-        <script type="text/javascript">
-            atOptions = { 'key' : 'a50a4d7af8cd844b5166b6be1c7e4f4f', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };
-        </script>
-        <script src="https://biomanos.org/22/a50a4d7af8cd844b5166b6be1c7e4f4f"></script>
-    </div>
-</div>
     <!-- IN-APP VIDEO STREAMING MODAL -->
     <div id="playerModal">
         <div class="modal-content-wrapper">
@@ -193,7 +167,8 @@
         // LIVE RENDER BACKEND URL
         const BACKEND_URL = "https://vip-vault-backend-n771.onrender.com"; 
 
-        
+        // INITIALIZE ADSGRAM
+        const adController = window.Adsgram ? window.Adsgram.init({ blockId: "56473" }) : null;
 
         let allVideos = [];
 
@@ -239,84 +214,45 @@
 
             document.getElementById('videoCountBadge').innerText = `${videos.length} ${videos.length === 1 ? 'VIDEO' : 'VIDEOS'}`;
 
-            grid.innerHTML = videos.map((video, index) => {
-    const thumbMarkup = video.thumbnailUrl 
-        ? `<img class="thumb" loading="lazy" decoding="async" src="${video.thumbnailUrl}" alt="">`
-        : `<div style="position:absolute; inset:0; display:grid; place-items:center; color:#a99a7a; font-size:30px; background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%);">▶</div>`;
+            grid.innerHTML = videos.map(video => {
+                const thumbMarkup = video.thumbnailUrl 
+                    ? `<img class="thumb" loading="lazy" decoding="async" src="${video.thumbnailUrl}" alt="">`
+                    : `<div style="position:absolute; inset:0; display:grid; place-items:center; color:#a99a7a; font-size:30px; background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%);">▶</div>`;
 
-    const safeTitle = (video.title || 'Video').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-    const safeUrl = video.videoUrl;
+                const safeTitle = (video.title || 'Video').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const safeUrl = video.videoUrl;
 
-    // ADSTERRA 320x50 BANNER (TRIGGERS AFTER EVERY 4th VIDEO)
-    let adBlock = '';
-    if ((index + 1) % 4 === 0) {
-        adBlock = `
-            <div style="grid-column: 1 / -1; background:#171720; border:1px solid rgba(255,255,255,.09); border-radius:16px; padding:10px; text-align:center; margin:8px 0;">
-                <div style="font-size:9px; color:#888; margin-bottom:4px;">SPONSORED</div>
-                <script type="text/javascript">
-                    atOptions = { 'key' : '6bd582de79306e80346203133f56710f', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-                </script>
-                <script src="https://biomanos.org/22/6bd582de79306e80346203133f56710f"></script>
-            </div>
-        `;
-    }
-
-    return `
-        <article class="video-card">
-            <div class="thumbnail-container">
-                <div class="featured-badge">FEATURED</div>
-                ${thumbMarkup}
-                <div class="play-icon-overlay" aria-hidden="true">▶</div>
-            </div>
-            <div class="card-content">
-                <h4 class="video-title">${escapeHtml(video.title || 'VIP Vault Video')}</h4>
-                <button class="watch-btn" onclick="handleWatchClick('${safeUrl}', '${safeTitle}')" type="button">
-                    ▶ &nbsp; WATCH VIDEO
-                </button>
-            </div>
-        </article>
-        ${adBlock}
-    `;
-}).join('');
+                return `
+                    <article class="video-card">
+                        <div class="thumbnail-container">
+                            <div class="featured-badge">FEATURED</div>
+                            ${thumbMarkup}
+                            <div class="play-icon-overlay" aria-hidden="true">▶</div>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="video-title">${escapeHtml(video.title || 'VIP Vault Video')}</h4>
+                            <button class="watch-btn" onclick="handleWatchClick('${safeUrl}', '${safeTitle}')" type="button">
+                                ▶ &nbsp; WATCH VIDEO
+                            </button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
         }
 
-    let pendingUrl = '';
-let pendingTitle = '';
-let countdownTimer = null;
-
-// REPLACE OLD handleWatchClick WITH THIS:
-function handleWatchClick(videoUrl, videoTitle) {
-    pendingUrl = videoUrl;
-    pendingTitle = videoTitle;
-
-    const adOverlay = document.getElementById('adModalOverlay');
-    const timerText = document.getElementById('adTimerText');
-    const skipBtn = document.getElementById('skipAdBtn');
-    let timeLeft = 5;
-
-    adOverlay.style.display = 'flex';
-    skipBtn.style.display = 'none';
-    timerText.innerHTML = `Video starting in <span id="countdownNum">${timeLeft}</span>s...`;
-
-    if (countdownTimer) clearInterval(countdownTimer);
-
-    countdownTimer = setInterval(() => {
-        timeLeft--;
-        if (timeLeft > 0) {
-            document.getElementById('countdownNum').innerText = timeLeft;
-        } else {
-            clearInterval(countdownTimer);
-            timerText.innerText = "You can now watch your video!";
-            skipBtn.style.display = 'block';
+        // Handle Ad + In-App Player Modal Trigger
+        function handleWatchClick(videoUrl, videoTitle) {
+            if (adController) {
+                adController.show().then((result) => {
+                    openPlayer(videoUrl, videoTitle);
+                }).catch((err) => {
+                    console.log("Ad skipped or failed", err);
+                    openPlayer(videoUrl, videoTitle);
+                });
+            } else {
+                openPlayer(videoUrl, videoTitle);
+            }
         }
-    }, 1000);
-}
-
-// ADD THIS NEW FUNCTION RIGHT BELOW IT:
-function finishAdAndOpenVideo() {
-    document.getElementById('adModalOverlay').style.display = 'none';
-    openPlayer(pendingUrl, pendingTitle);
-}
 
         function openPlayer(url, title) {
             const modal = document.getElementById('playerModal');
@@ -376,43 +312,32 @@ function finishAdAndOpenVideo() {
 
             document.getElementById('videoCountBadge').innerText = `${videos.length} ${videos.length === 1 ? 'VIDEO' : 'VIDEOS'}`;
 
-           grid.innerHTML = videos.map((video, index) => {
-    const thumbUrl = video.thumbnailUrl || '';
-    const safeTitle = (video.title || 'VIP Vault Video').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-    const safeUrl = video.videoUrl || '#';
+            grid.innerHTML = videos.map(video => {
+                const thumbMarkup = video.thumbnailUrl 
+                    ? `<img class="thumb" loading="lazy" decoding="async" src="${video.thumbnailUrl}" alt="">`
+                    : `<div style="position:absolute; inset:0; display:grid; place-items:center; color:#a99a7a; font-size:30px; background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%);">▶</div>`;
 
-    // 320x50 banner after every 4th video
-    let adBlock = '';
-    if ((index + 1) % 4 === 0) {
-        adBlock = `
-            <div style="grid-column: 1 / -1; background:#171720; border:1px solid rgba(255,255,255,.09); border-radius:16px; padding:10px; text-align:center; margin:8px 0;">
-                <div style="font-size:9px; color:#888; margin-bottom:4px;">SPONSORED</div>
-                <script type="text/javascript">
-                    atOptions = { 'key' : '6158574', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-                </script>
-                <script type="text/javascript" src="//www.highperformanceformat.com/6158574/invoke.js"></script>
-            </div>
-        `;
-    }
+                const safeTitle = (video.title || 'Video').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const safeUrl = video.videoUrl;
 
-    return `
-        <article class="video-card">
-            <div class="thumbnail-container">
-                <div class="featured-badge">FEATURED</div>
-                ${thumbUrl ? '<img class="thumb" loading="lazy" decoding="async" src="' + thumbUrl + '" alt="">' : '<div style="position:absolute; inset:0; display:grid; place-items:center; color:#a99a7a; font-size:30px; background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%);">▶</div>'}
-                <div class="play-icon-overlay" aria-hidden="true">▶</div>
-            </div>
-            <div class="card-content">
-                <h4 class="video-title">${video.title || 'VIP Vault Video'}</h4>
-                <button class="watch-btn" onclick="handleWatchClick('${safeUrl}', '${safeTitle}')" type="button">
-                    ▶ &nbsp; WATCH VIDEO
-                </button>
-            </div>
-        </article>
-        ${adBlock}
-    `;
-}).join('');
-}
+                return `
+                    <article class="video-card">
+                        <div class="thumbnail-container">
+                            <div class="featured-badge">FEATURED</div>
+                            ${thumbMarkup}
+                            <div class="play-icon-overlay" aria-hidden="true">▶</div>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="video-title">${escapeHtml(video.title || 'VIP Vault Video')}</h4>
+                            <button class="watch-btn" onclick="handleWatchClick('${safeUrl}', '${safeTitle}')" type="button">
+                                ▶ &nbsp; WATCH VIDEO
+                            </button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
         function escapeHtml(text) {
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
