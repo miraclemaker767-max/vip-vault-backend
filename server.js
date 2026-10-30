@@ -38,7 +38,7 @@ if (mongoose && process.env.MONGO_URI) {
 }
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
-const CHANNEL_ID = '+8mwm9ewoG3I0NWRl';
+const CHANNEL_ID = -1003528406982;
 const MINI_APP_URL = 'https://vip-vault-backend-n771.onrender.com';
 
 async function checkMembership(userId) {
