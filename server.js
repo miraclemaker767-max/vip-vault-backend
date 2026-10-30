@@ -13,8 +13,9 @@ try {
     id: Number,
     title: String,
     fileId: { type: String, unique: true },
-    videoUrl: String,
+        videoUrl: String,
     thumbnailUrl: String,
+    thumbnailFileId: String,
     createdAt: { type: Date, default: Date.now }
   });
   Video = mongoose.model('Video', videoSchema);
@@ -61,14 +62,19 @@ bot.on('channel_post', async (msg) => {
     const file = await bot.getFile(fileId);
     const videoUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
 
-    let thumbnailUrl = '';
-    if (mediaObj.thumb && mediaObj.thumb.file_id) {
+        let thumbnailUrl = '';
+    const thumbnailObj = mediaObj.thumbnail || mediaObj.thumb || null;
+    const thumbnailFileId = thumbnailObj?.file_id || '';
+
+    if (thumbnailFileId) {
       try {
-        const thumbFile = await bot.getFile(mediaObj.thumb.file_id);
+        const thumbFile = await bot.getFile(thumbnailFileId);
         thumbnailUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${thumbFile.file_path}`;
       } catch (thumbErr) {
         console.log("⚠️ Could not fetch thumbnail file path:", thumbErr.message);
       }
+    } else {
+      console.log("ℹ️ Telegram did not provide a thumbnail for:", caption);
     }
 
     const videoData = {
@@ -76,7 +82,8 @@ bot.on('channel_post', async (msg) => {
       title: caption,
       fileId: fileId,
       videoUrl: videoUrl,
-      thumbnailUrl: thumbnailUrl,
+            thumbnailUrl: thumbnailUrl,
+      thumbnailFileId: thumbnailFileId,
       createdAt: new Date()
     };
 
@@ -107,7 +114,16 @@ app.get('/api/videos', async (req, res) => {
     res.json({ success: true, videos: videoList });
   }
 });
-
+app.get('/api/thumbnail/:fileId', async (req, res) => {
+  try {
+    const file = await bot.getFile(req.params.fileId);
+    const thumbnailUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
+    res.redirect(thumbnailUrl);
+  } catch (err) {
+    console.error('Thumbnail refresh failed:', err.message);
+    res.status(404).json({ error: 'Thumbnail unavailable' });
+  }
+});
 app.get('/api/stream/:fileId', async (req, res) => {
   try {
     const file = await bot.getFile(req.params.fileId);
