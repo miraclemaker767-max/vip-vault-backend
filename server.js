@@ -39,7 +39,20 @@ if (mongoose && process.env.MONGO_URI) {
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 const CHANNEL_ID = process.env.CHANNEL_ID;
-
+// ==========================================
+// 🚀 ADDED: /START COMMAND HANDLER WITH BUTTON
+// ==========================================
+bot.onText(/\/start/, (msg) => {
+    bot.sendMessage(msg.chat.id, "👋 **Welcome to VIP Vault!**\n\nPlease join our channel below:", {
+        parse_mode: 'Markdown',
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: '📢 Join Our Channel', url: 'https://t.me/+YOUR_INVITE_LINK' }]
+            ]
+        }
+    });
+});
+// ==========================================
 bot.on('channel_post', async (msg) => {
   console.log("--> Post detected in Channel ID:", msg.chat.id);
   
