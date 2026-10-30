@@ -38,7 +38,8 @@ if (mongoose && process.env.MONGO_URI) {
 }
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
-const CHANNEL_ID = -1003528406982;
+const CHANNEL_ID = -1003528406982; // 
+const CHANNEL_INVITE_LINK = 'https://t.me/+8mwm9ewoG3I0NWRl'; 
 const MINI_APP_URL = 'https://vip-vault-backend-n771.onrender.com';
 
 async function checkMembership(userId) {
@@ -67,7 +68,7 @@ bot.onText(/\/start/, async (msg) => {
             parse_mode: 'Markdown',
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: '📢 Join Channel', url: `https://t.me/${CHANNEL_ID.replace('@', '')}` }],
+                    [{ text: '📢 Join Channel', url: CHANNEL_INVITE_LINK }], // Uses your invite link
                     [{ text: '✅ I Have Joined', callback_data: 'verify_join' }]
                 ]
             }
