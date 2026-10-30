@@ -174,7 +174,54 @@
   justify-content: center;
   overflow: hidden;
 }
+.video-end-ad-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  padding: 18px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.86);
+  backdrop-filter: blur(8px);
+}
 
+.video-end-ad-card {
+  position: relative;
+  width: min(100%, 340px);
+  min-height: 270px;
+  padding: 24px 12px 12px;
+  border: 1px solid rgba(231,196,119,.55);
+  border-radius: 18px;
+  background: linear-gradient(145deg,#211b12,#111118 65%);
+  box-shadow: 0 18px 60px #000c;
+}
+
+.video-end-ad-close {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  z-index: 2;
+  width: 27px;
+  height: 27px;
+  border: 1px solid #ffffff35;
+  border-radius: 50%;
+  background: #292832;
+  color: #fff;
+  font-size: 21px;
+  cursor: pointer;
+}
+
+.video-end-ad-content {
+  width: 300px;
+  max-width: 100%;
+  min-height: 250px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
     </style>
 </head>
 <body>
@@ -188,7 +235,17 @@
     <div id="appOpenAdContent" class="app-open-ad-content"></div>
   </div>
 </div>
-
+<!-- Video completion advertisement popup -->
+<div id="videoEndAdPopup" class="video-end-ad-overlay"
+     role="dialog" aria-modal="true"
+     aria-label="Advertisement" aria-hidden="true">
+  <div class="video-end-ad-card">
+    <button class="video-end-ad-close" type="button"
+            onclick="closeVideoEndAd()">×</button>
+    <div class="app-open-ad-label">ADVERTISEMENT</div>
+    <div id="videoEndAdContent" class="video-end-ad-content"></div>
+  </div>
+</div>
     <main class="app">
         <header class="topbar">
             <div class="brand">
@@ -441,18 +498,31 @@ loadAdsterraSlot(0);
             videoElement.autoplay = true;
             videoElement.playsInline = true;
             videoElement.controlsList = "nodownload";
+            videoElement.dataset.finished = "false";
+
+videoElement.addEventListener("ended", () => {
+    videoElement.dataset.finished = "true";
+});
 
             playerBody.append(videoElement);
             modal.style.display = 'flex';
         }
 
         function closePlayer() {
-            const modal = document.getElementById('playerModal');
-            const playerBody = document.querySelector('.video-player-container');
-            
-            playerBody.replaceChildren();
-            modal.style.display = 'none';
-        }
+    const modal = document.getElementById('playerModal');
+    const playerBody = document.querySelector('.video-player-container');
+    const videoElement = document.getElementById('activeVideoPlayer');
+
+    const finished = videoElement &&
+        videoElement.dataset.finished === "true";
+
+    playerBody.replaceChildren();
+    modal.style.display = 'none';
+
+    if (finished) {
+        window.setTimeout(showVideoEndAd, 350);
+    }
+}
 
         function filterVideos() {
             const query = document.getElementById('searchInput').value.toLowerCase();
@@ -512,7 +582,47 @@ function closeAppOpenAd() {
   popup.style.display = 'none';
   popup.setAttribute('aria-hidden', 'true');
 }
+function showVideoEndAd() {
+    const popup = document.getElementById('videoEndAdPopup');
+    const content = document.getElementById('videoEndAdContent');
 
+    if (!popup || !content) return;
+
+    popup.style.display = 'flex';
+    popup.setAttribute('aria-hidden', 'false');
+
+    if (!content.dataset.loaded) {
+        content.dataset.loaded = 'true';
+
+        const optionsScript = document.createElement('script');
+        optionsScript.textContent = `
+            window.atOptions = {
+                'key': 'a50a4d7af8cd844b5166b6be1c7e4f4f',
+                'format': 'iframe',
+                'height': 250,
+                'width': 300,
+                'params': {}
+            };
+        `;
+
+        const adScript = document.createElement('script');
+        adScript.src =
+            'https://biomanos.org/22/a50a4d7af8cd844b5166b6be1c7e4f4f';
+        adScript.async = true;
+
+        content.appendChild(optionsScript);
+        content.appendChild(adScript);
+    }
+}
+
+function closeVideoEndAd() {
+    const popup = document.getElementById('videoEndAdPopup');
+
+    if (!popup) return;
+
+    popup.style.display = 'none';
+    popup.setAttribute('aria-hidden', 'true');
+}
 // Load videos and show the app-open ad after 0.5 seconds.
 fetchVideos();
 window.setTimeout(showAppOpenAd, 500);
