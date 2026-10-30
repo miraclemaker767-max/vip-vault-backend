@@ -47,7 +47,7 @@ bot.onText(/\/start/, (msg) => {
         parse_mode: 'Markdown',
         reply_markup: {
             inline_keyboard: [
-                [{ text: '📢 Join Our Channel', url: 'https://t.me/+YOUR_INVITE_LINK' }]
+                [{ text: '📢 Join Our Channel', url: 'https://t.me/+8mwm9ewoG3I0NWRl' }]
             ]
         }
     });
