@@ -114,6 +114,21 @@ app.get('/api/videos', async (req, res) => {
     res.json({ success: true, videos: videoList });
   }
 });
+app.get('/api/check-thumbnail/:fileId', async (req, res) => {
+  try {
+    const file = await bot.getFile(req.params.fileId);
+
+    res.json({
+      fileId: req.params.fileId,
+      filePath: file.file_path,
+      fileSize: file.file_size,
+      thumbnailAvailable: !!(file.thumbnail || file.thumb),
+      thumbnail: file.thumbnail || file.thumb || null
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 app.get('/api/thumbnail/:fileId', async (req, res) => {
   try {
     const file = await bot.getFile(req.params.fileId);
