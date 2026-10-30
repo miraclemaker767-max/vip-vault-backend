@@ -96,15 +96,20 @@
 
         /* Adsterra placements */
         .adsterra-banner-slot {
-            grid-column: 1 / -1;
-            width: 100%;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        .adsterra-banner-slot > div { width: 300px; max-width: 100%; min-height: 250px; }
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.adsterra-banner-slot > div {
+    width: 300px;
+    max-width: 100%;
+    min-height: 250px;
+}
         .adsterra-watch-ad {
             width: 300px;
             max-width: 100%;
@@ -421,20 +426,27 @@ const thumbMarkup = thumbnailSrc
                     </article>`;
 
                 const banner = (index + 1) % 4 === 0 && index < videos.length - 1
-                    ? `<div class="adsterra-banner-slot"><div id="adsterra-banner-${index}">></div></div>`
+                    ? `<div class="adsterra-banner-slot"><div id="adsterra-banner-${index}"></div></div>`
                     : '';
 
                 return card + banner;
             }).join('');
 
-            const adSlots = Array.from(
-    document.querySelectorAll('.adsterra-banner-slot > div[id^="adsterra-banner-"]')
+const adSlots = Array.from(
+    grid.querySelectorAll('.adsterra-banner-slot > div[id^="adsterra-banner-"]')
 );
 
 function loadAdsterraSlot(index) {
     if (index >= adSlots.length) return;
 
     const slot = adSlots[index];
+    let completed = false;
+
+    function loadNext() {
+        if (completed) return;
+        completed = true;
+        loadAdsterraSlot(index + 1);
+    }
 
     const optionsScript = document.createElement('script');
     optionsScript.textContent = `
@@ -451,12 +463,14 @@ function loadAdsterraSlot(index) {
     adScript.src = 'https://biomanos.org/22/a50a4d7af8cd844b5166b6be1c7e4f4f';
     adScript.async = false;
 
-    adScript.onload = () => {
-        loadAdsterraSlot(index + 1);
-    };
+    adScript.onload = loadNext;
+    adScript.onerror = loadNext;
 
     slot.appendChild(optionsScript);
     slot.appendChild(adScript);
+
+    // Continue if the ad script never responds.
+    setTimeout(loadNext, 10000);
 }
 
 loadAdsterraSlot(0);
