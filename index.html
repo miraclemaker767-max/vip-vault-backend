@@ -346,7 +346,15 @@ const thumbMarkup = thumbnailSrc
                 return card + banner;
             }).join('');
 
-            document.querySelectorAll('.adsterra-banner-slot > div[id^="adsterra-banner-"]').forEach((slot) => {
+            const adSlots = Array.from(
+    document.querySelectorAll('.adsterra-banner-slot > div[id^="adsterra-banner-"]')
+);
+
+function loadAdsterraSlot(index) {
+    if (index >= adSlots.length) return;
+
+    const slot = adSlots[index];
+
     const optionsScript = document.createElement('script');
     optionsScript.textContent = `
         window.atOptions = {
@@ -360,11 +368,17 @@ const thumbMarkup = thumbnailSrc
 
     const adScript = document.createElement('script');
     adScript.src = 'https://biomanos.org/22/a50a4d7af8cd844b5166b6be1c7e4f4f';
-    adScript.async = true;
+    adScript.async = false;
+
+    adScript.onload = () => {
+        loadAdsterraSlot(index + 1);
+    };
 
     slot.appendChild(optionsScript);
     slot.appendChild(adScript);
-});
+}
+
+loadAdsterraSlot(0);
 
 
             grid.querySelectorAll('[data-watch-index]').forEach(button => {
