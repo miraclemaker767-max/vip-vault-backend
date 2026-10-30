@@ -33,7 +33,7 @@
         }
         button, input { font: inherit; }
         button { -webkit-tap-highlight-color: transparent; }
-        .app { width: min(100%, 980px); margin: 0 auto; padding: max(18px, env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom)); }
+        .app { width: min(100%, 980px); margin: 0 auto; padding: max(18px, env(safe-area-inset-top)) 16px calc(90px + env(safe-area-inset-bottom)); }
         .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 4px 0 20px; }
         .brand { display:flex; align-items:center; gap:11px; min-width:0; }
         .brand-mark {
@@ -227,6 +227,33 @@
   justify-content: center;
   overflow: hidden;
 }
+        /* Sticky bottom advertisement */
+.sticky-ad {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    min-height: 50px;
+    padding-bottom: env(safe-area-inset-bottom);
+    background: #09090d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 900;
+}
+
+.sticky-ad-close {
+    position: absolute;
+    right: 5px;
+    top: -25px;
+    width: 25px;
+    height: 25px;
+    border: 1px solid #ffffff33;
+    border-radius: 50%;
+    background: #222;
+    color: white;
+    cursor: pointer;
+}
     </style>
 </head>
 <body>
@@ -303,6 +330,23 @@
             VIP CONTENT VAULT · Made for mobile browsing<br>Only open content you are authorized to access.
         </footer>
     </main>
+    <!-- Sticky bottom 320x50 advertisement -->
+<div class="sticky-ad" id="stickyAd">
+    <button class="sticky-ad-close"
+            onclick="document.getElementById('stickyAd').style.display='none'"
+            aria-label="Close advertisement">×</button>
+
+    <script>
+        atOptions = {
+            'key': '6bd582de79306e80346203133f56710f',
+            'format': 'iframe',
+            'height': 50,
+            'width': 320,
+            'params': {}
+        };
+    </script>
+    <script src="https://biomanos.org/22/6bd582de79306e80346203133f56710f"></script>
+</div>
 
     <!-- IN-APP VIDEO STREAMING MODAL -->
     <div id="playerModal">
