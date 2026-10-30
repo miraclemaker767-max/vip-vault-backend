@@ -511,18 +511,26 @@ videoElement.addEventListener("ended", () => {
         function closePlayer() {
     const modal = document.getElementById('playerModal');
     const playerBody = document.querySelector('.video-player-container');
-    const videoElement = document.getElementById('activeVideoPlayer');
-
-    const finished = videoElement &&
-        videoElement.dataset.finished === "true";
 
     playerBody.replaceChildren();
     modal.style.display = 'none';
 
-    if (finished) {
-        window.setTimeout(showVideoEndAd, 350);
-    }
+    window.setTimeout(showVideoEndAd, 350);
 }
+        window.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' &&
+        document.getElementById('playerModal').style.display === 'flex') {
+        closePlayer();
+    }
+});
+
+window.addEventListener('popstate', function() {
+    const modal = document.getElementById('playerModal');
+
+    if (modal.style.display === 'flex') {
+        closePlayer();
+    }
+});
 
         function filterVideos() {
             const query = document.getElementById('searchInput').value.toLowerCase();
