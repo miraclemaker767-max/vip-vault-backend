@@ -38,6 +38,57 @@ if (mongoose && process.env.MONGO_URI) {
 }
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
+const CHANNEL_ID = '-1003528406982';
+const MINI_APP_URL = 'https://vip-vault-backend-n771.onrender.com';
+
+async function checkMembership(userId) {
+    try {
+        const chatMember = await bot.getChatMember(CHANNEL_ID, userId);
+        return ['member', 'administrator', 'creator'].includes(chatMember.status);
+    } catch (err) {
+        return false;
+    }
+}
+
+function sendSuccessMessage(chatId) {
+    bot.sendMessage(chatId, "✅ **Joined!**\n\nYou are successfully verified in the channel.", {
+        parse_mode: 'Markdown',
+        reply_markup: {
+            inline_keyboard: [[{ text: '🚀 Click Explore to Start Watching', web_app: { url: MINI_APP_URL } }]]
+        }
+    });
+}
+
+bot.onText(/\/start/, async (msg) => {
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    if (!(await checkMembership(userId))) {
+        return bot.sendMessage(chatId, "⚠️ **Access Restricted!**\n\nYou must join our official channel before using this bot.", {
+            parse_mode: 'Markdown',
+            reply_markup: {
+                inline_keyboard: [
+                    [{ text: '📢 Join Channel', url: `https://t.me/${CHANNEL_ID.replace('@', '')}` }],
+                    [{ text: '✅ I Have Joined', callback_data: 'verify_join' }]
+                ]
+            }
+        });
+    }
+    sendSuccessMessage(chatId);
+});
+
+bot.on('callback_query', async (query) => {
+    if (query.data === 'verify_join') {
+        const chatId = query.message.chat.id;
+        const userId = query.from.id;
+        if (await checkMembership(userId)) {
+            bot.answerCallbackQuery(query.id, { text: 'Verification successful! 🎉' });
+            bot.deleteMessage(chatId, query.message.message_id).catch(() => {});
+            sendSuccessMessage(chatId);
+        } else {
+            bot.answerCallbackQuery(query.id, { text: '❌ You have not joined the channel yet!', show_alert: true });
+        }
+    }
+});
 const CHANNEL_ID = process.env.CHANNEL_ID;
 
 bot.on('channel_post', async (msg) => {
