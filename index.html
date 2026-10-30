@@ -316,8 +316,12 @@
             document.getElementById('videoCountBadge').innerText = `${videos.length} ${videos.length === 1 ? 'VIDEO' : 'VIDEOS'}`;
 
             grid.innerHTML = videos.map((video, index) => {
-                const thumbMarkup = video.thumbnailUrl
-                    ? `<img class="thumb" loading="lazy" decoding="async" src="${escapeHtml(video.thumbnailUrl)}" alt="">`
+                const thumbnailSrc = video.thumbnailFileId
+    ? `${BACKEND_URL}/api/thumbnail/${encodeURIComponent(video.thumbnailFileId)}`
+    : video.thumbnailUrl;
+
+const thumbMarkup = thumbnailSrc
+    ? `<img class="thumb" loading="lazy" decoding="async" src="${escapeHtml(thumbnailSrc)}" alt="">`
                     : `<div style="position:absolute;inset:0;display:grid;place-items:center;color:#a99a7a;font-size:30px;background:radial-gradient(circle at 50% 35%,#39302a,#15151c 65%);">▶</div>`;
 
                 const card = `
@@ -367,9 +371,15 @@ document.querySelectorAll('.adsterra-banner-slot > div[id^="adsterra-banner-"]')
             grid.querySelectorAll('[data-watch-index]').forEach(button => {
                 button.addEventListener('click', () => {
                     const video = videos[Number(button.dataset.watchIndex)];
-                    if (video && video.videoUrl) {
-                        handleWatchClick(video.videoUrl, video.title || 'VIP Vault Video');
-                    }
+                    if (video && video.fileId) {
+    handleWatchClick(
+        `${BACKEND_URL}/api/stream/${encodeURIComponent(video.fileId)}`,
+        video.title || 'VIP Vault Video'
+    );
+} else if (video && video.videoUrl) {
+    // Backward compatibility for older records.
+    handleWatchClick(video.videoUrl, video.title || 'VIP Vault Video');
+}
                 });
             });
         }
