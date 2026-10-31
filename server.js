@@ -38,6 +38,20 @@ if (mongoose && process.env.MONGO_URI) {
 }
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
+// Automatically set the Telegram Menu Button text and link on startup
+bot.setChatMenuButton({
+    menu_button: {
+        type: 'web_app',
+        text: 'Open',
+        web_app: {
+            url: 'https://vip-vault-backend-n771.onrender.com' // Replace with your frontend URL if different
+        }
+    }
+}).then(() => {
+    console.log("✅ Menu button successfully updated to 'Open'");
+}).catch(err => {
+    console.error("❌ Failed to set menu button:", err.message);
+});
 const CHANNEL_ID = process.env.CHANNEL_ID;
 // ==========================================
 // 🚀 ADDED: /START COMMAND HANDLER WITH BUTTON
